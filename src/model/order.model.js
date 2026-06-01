@@ -1,0 +1,137 @@
+const db = require('../config/db');
+
+// CREATE ORDER
+const createOrder = async (
+  user_id,
+  total_price,
+  status = 'pending'
+) => {
+  try {
+
+    const result = await db.query(
+      `INSERT INTO orders (
+          user_id,
+          total_price,
+          status
+       )
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [user_id, total_price, status]
+    );
+
+    return result.rows[0];
+
+  } catch (err) {
+    throw new Error('Error creating order: ' + err.message);
+  }
+};
+
+
+// GET ALL ORDERS
+const getOrders = async (limit = 10, offset = 0) => {
+  try {
+
+    const result = await db.query(
+      `SELECT *
+       FROM orders
+       ORDER BY created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+
+    return result.rows;
+
+  } catch (err) {
+    throw new Error('Error fetching orders: ' + err.message);
+  }
+};
+
+
+// GET ORDER BY ID
+const getOrderById = async (id) => {
+  try {
+
+    const result = await db.query(
+      `SELECT *
+       FROM orders
+       WHERE id = $1`,
+      [id]
+    );
+
+    return result.rows[0] || null;
+
+  } catch (err) {
+    throw new Error('Error fetching order: ' + err.message);
+  }
+};
+
+//GET ORDER DETIALS
+//here ??
+
+// GET ORDERS BY USER
+const getOrdersByUser = async (user_id) => {
+  try {
+
+    const result = await db.query(
+      `SELECT *
+       FROM orders
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [user_id]
+    );
+
+    return result.rows;
+
+  } catch (err) {
+    throw new Error('Error fetching user orders: ' + err.message);
+  }
+};
+
+
+// UPDATE ORDER STATUS
+const updateOrderStatus = async (id, status) => {
+  try {
+
+    const result = await db.query(
+      `UPDATE orders
+       SET status = $1
+       WHERE id = $2
+       RETURNING *`,
+      [status, id]
+    );
+
+    return result.rows[0] || null;
+
+  } catch (err) {
+    throw new Error('Error updating order status: ' + err.message);
+  }
+};
+
+
+// DELETE ORDER
+const deleteOrder = async (id) => {
+  try {
+
+    const result = await db.query(
+      `DELETE FROM orders
+       WHERE id = $1
+       RETURNING *`,
+      [id]
+    );
+
+    return result.rows[0] || null;
+
+  } catch (err) {
+    throw new Error('Error deleting order: ' + err.message);
+  }
+};
+
+
+module.exports = {
+  createOrder,
+  getOrders,
+  getOrderById,
+  getOrdersByUser,
+  updateOrderStatus,
+  deleteOrder
+};
