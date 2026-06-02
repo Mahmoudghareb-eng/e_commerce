@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth.middleware');
+const checkCart = require('../middleware/cart.middleware');
 
 const {
   createCart,
@@ -13,10 +14,10 @@ const router = express.Router();
 // CREATE CART
 router.post('/', auth, createCart);
 // GET CART BY USER
-router.get('/', auth, getCartbyUser);
+router.get('/', auth, checkCart, getCartbyUser);
 // CLEAR CART (delete items only)
-router.delete('/clear', auth, clearCart);
+router.delete('/clear', auth, checkCart, clearCart); 
 // DELETE CART (delete cart itself)
-router.delete('/', auth, deleteCart);
+router.delete('/', auth, checkCart, deleteCart);
 
 module.exports = router;
