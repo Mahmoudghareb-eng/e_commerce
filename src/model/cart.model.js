@@ -31,9 +31,9 @@ const getCartbyUser = async (user_id) => {
 
 
 // CLEAR CART ITEMS
-const clearCart = async (cartId) => {
+const clearCart = async (cartId,client=db) => {
   try {
-    const result = await db.query(
+    const result = await client.query(
       `DELETE FROM cart_items WHERE cart_id = $1`,
       [cartId]
     );

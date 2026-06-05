@@ -37,9 +37,9 @@ const getProducts = async (limit = 10, offset = 0) => {
 
 
 // GET PRODUCT BY ID
-const getProductById = async (id) => {
+const getProductById = async (id,client=db) => {
   try {
-    const result = await db.query(
+    const result = await client.query(
       `SELECT * FROM products WHERE id = $1`,
       [id]
     );
@@ -72,6 +72,22 @@ const updateProduct = async (id, quantity, price) => {
   }
 };
 
+//update only quantity
+const updateQuantity = async(id,quantity,client=db)=>{
+  try{
+    const result = await client.query(
+      `UPDATE products
+      SET quantity=$2,
+      updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1 
+      RETURNING *`,
+      [id,quantity]
+    );
+    return result.rows[0];
+  } catch (err) {
+    throw new Error('Error updating product: ' + err.message);
+  }
+};
 
 // DELETE PRODUCT
 const deleteProduct = async (id) => {
@@ -97,5 +113,6 @@ module.exports = {
   getProducts,
   getProductById,
   updateProduct,
+  updateQuantity,
   deleteProduct
 };

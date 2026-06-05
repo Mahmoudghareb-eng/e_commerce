@@ -4,11 +4,12 @@ const db = require('../config/db');
 const createOrder = async (
   user_id,
   total_price,
-  status = 'pending'
+  status = 'pending',
+  client = db
 ) => {
   try {
 
-    const result = await db.query(
+    const result = await client.query(
       `INSERT INTO orders (
           user_id,
           total_price,

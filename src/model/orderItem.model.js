@@ -6,7 +6,8 @@ const createOrderItem = async (
   order_id,
   product_id,
   quantity,
-  price
+  price,
+  client = db
 ) => {
   try {
 
@@ -19,7 +20,7 @@ const createOrderItem = async (
       throw new Error('Price must be greater than 0');
     }
 
-    const result = await db.query(
+    const result = await client.query(
       `
       INSERT INTO order_items (
         order_id,
