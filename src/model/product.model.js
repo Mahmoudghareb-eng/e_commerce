@@ -51,6 +51,20 @@ const getProductById = async (id,client=db) => {
   }
 };
 
+// GET PRODUCT BY IDS
+const getProductsByIds = async (ids,client=db) => {
+  try {
+    const result = await client.query(
+      `SELECT * FROM products WHERE id = ANY($1)`,
+      [ids]
+    );
+
+    return result.rows;
+
+  } catch (err) {
+    throw new Error('Error fetching product: ' + err.message);
+  }
+};
 
 // UPDATE PRODUCT
 const updateProduct = async (id, quantity, price) => {
@@ -112,6 +126,7 @@ module.exports = {
   addProduct,
   getProducts,
   getProductById,
+  getProductsByIds,
   updateProduct,
   updateQuantity,
   deleteProduct

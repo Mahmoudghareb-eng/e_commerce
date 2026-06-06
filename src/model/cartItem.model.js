@@ -21,9 +21,9 @@ const addItemToCart = async (cart_id,product_id,quantity) => {
 };
 
 // GET CART ITEMS
-const getCartItems = async (cart_id) => {
+const getCartItems = async (cart_id,client=db) => {
   try {
-    const items = await db.query(
+    const items = await client.query(
       `SELECT
           ci.id,
           ci.quantity,
