@@ -6,6 +6,7 @@ const orderRoute = require('./routes/order.route');
 const orderItemRoute = require('./routes/orderItem.route');
 const cartRoute = require('./routes/cart.route');
 const cartItemRoute = require('./routes/cartItem.route');
+const checkout = require('./routes/checkout.route');
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,7 @@ app.use('/api/orders',orderRoute);
 app.use('/api/orders/items',orderItemRoute);
 app.use('/api/cart/items',cartItemRoute);
 app.use('/api/cart',cartRoute);
+app.use('/api/checkout',checkout);
 
 app.use((req, res) => {
   res.status(404).json({ msg: "Route not found" });
