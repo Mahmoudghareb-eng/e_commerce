@@ -55,7 +55,8 @@ const getProductById = async (id,client=db) => {
 const getProductsByIds = async (ids,client=db) => {
   try {
     const result = await client.query(
-      `SELECT * FROM products WHERE id = ANY($1)`,
+      `SELECT * FROM products WHERE id = ANY($1)
+      FOR UPDATE`,
       [ids]
     );
 
