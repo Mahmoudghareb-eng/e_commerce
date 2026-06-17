@@ -5,6 +5,7 @@ const {
   getOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
   deleteOrder
 } = require('../controllers/order.controller');
 
@@ -24,6 +25,9 @@ router.get('/:id', auth, getOrderById);
 
 // UPDATE ORDER STATUS
 router.put('/:id', auth, updateOrderStatus);
+
+//CANCEL ORDER
+router.patch('/:id/cancel',auth,cancelOrder);
 
 // DELETE ORDER
 router.delete('/:id', auth, deleteOrder);

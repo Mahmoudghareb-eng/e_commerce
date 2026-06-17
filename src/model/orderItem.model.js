@@ -45,10 +45,10 @@ const createOrderItem = async (
 
 
 // GET ALL ITEMS FOR ORDER
-const getItemsByOrderId = async (order_id) => {
+const getItemsByOrderId = async (order_id,client=db) => {
   try {
 
-    const result = await db.query(
+    const result = await client.query(
       `
       SELECT
         oi.id,

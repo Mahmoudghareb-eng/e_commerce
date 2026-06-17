@@ -49,10 +49,10 @@ const getOrders = async (limit = 10, offset = 0) => {
 
 
 // GET ORDER BY ID
-const getOrderById = async (id) => {
+const getOrderById = async (id,client=db) => {
   try {
 
-    const result = await db.query(
+    const result = await client.query(
       `SELECT *
        FROM orders
        WHERE id = $1`,
@@ -90,10 +90,10 @@ const getOrdersByUser = async (user_id) => {
 
 
 // UPDATE ORDER STATUS
-const updateOrderStatus = async (id, status) => {
+const updateOrderStatus = async (id, status,client=db) => {
   try {
 
-    const result = await db.query(
+    const result = await client.query(
       `UPDATE orders
        SET status = $1
        WHERE id = $2
