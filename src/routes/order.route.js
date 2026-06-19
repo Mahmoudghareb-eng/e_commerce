@@ -10,6 +10,7 @@ const {
 } = require('../controllers/order.controller');
 
 const auth = require('../middleware/auth.middleware');
+const isAdmin = require('../middleware/isAdmin');
 
 const router = express.Router();
 
@@ -24,10 +25,10 @@ router.get('/', auth, getOrders);
 router.get('/:id', auth, getOrderById);
 
 // UPDATE ORDER STATUS
-router.put('/:id', auth, updateOrderStatus);
+router.put('/:id', auth, isAdmin, updateOrderStatus);
 
 //CANCEL ORDER
-router.patch('/:id/cancel',auth,cancelOrder);
+router.patch('/:id/cancel', auth, cancelOrder);
 
 // DELETE ORDER
 router.delete('/:id', auth, deleteOrder);

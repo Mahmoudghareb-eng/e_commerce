@@ -22,7 +22,7 @@ const rigster = async(req,res)=>{
         //hash
         const hashPassword = await bcrypt.hash(password,10);
     
-        const user = await User.createUser(name,email,hashPassword);
+        const user = await User.createUser(name,emailLower,hashPassword);
         const token = generateToken({
             id:user.id,
             email:user.email
@@ -63,7 +63,8 @@ const login = async(req,res)=>{
     }
     const token = generateToken({
         id:user.id,
-        email:user.email
+        email:user.email,
+        role:user.role
     });    
     return res.status(200).json({
         message: "User logedin successfully",
