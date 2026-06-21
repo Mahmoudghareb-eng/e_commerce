@@ -4,7 +4,7 @@ const Cart_item = require('../model/cartItem.model');
 const Product = require('../model/product.model');
 const Order = require('../model/order.model');
 const Order_items = require('../model/orderItem.model');
- 
+const Coupon = require('../model/coupons.model');
 
 const checkout = async(req,res)=>{
     let client;
@@ -13,6 +13,7 @@ const checkout = async(req,res)=>{
         await client.query('BEGIN');
 
         const cart = req.cart;
+        const {code} = req.body;
         const items = await Cart_item.getCartItems(cart.id,client);
         if(items.length === 0){
             const err = new Error(`cart is empty`);
@@ -41,6 +42,23 @@ const checkout = async(req,res)=>{
         let total_price = 0;
         for(const item of items){
             total_price+=item.quantity*item.price;
+        }
+        let discount = 0;
+        let coupon;
+        if(code){
+            coupon = await Coupon.getCouponsByCode(code,client);
+            if(!coupon){
+                const err = new Error('Invalid Coupon')
+                err.status=400
+                throw err;                
+            }
+            if(coupon.expires_at&&new Date(coupon.expires_at)<new Date()){
+                const err = new Error('Coupon expired');
+                err.status=400
+                throw err;
+            }
+            discount = total_price * (coupon.discount_percent/100);
+            total_price-=discount;
         }
         const order = await Order.createOrder(req.user.id,total_price,"pending",client);
         let order_items=[];

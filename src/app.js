@@ -6,6 +6,7 @@ const orderRoute = require('./routes/order.route');
 const orderItemRoute = require('./routes/orderItem.route');
 const cartRoute = require('./routes/cart.route');
 const cartItemRoute = require('./routes/cartItem.route');
+const couponRoute = require('./routes/coupons.route');
 const checkout = require('./routes/checkout.route');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/orders',orderRoute);
 app.use('/api/orders/items',orderItemRoute);
 app.use('/api/cart/items',cartItemRoute);
 app.use('/api/cart',cartRoute);
+app.use('/api/coupons',couponRoute);
 app.use('/api/checkout',checkout);
 
 app.use((req, res) => {

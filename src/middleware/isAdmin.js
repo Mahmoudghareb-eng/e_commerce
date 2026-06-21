@@ -1,8 +1,6 @@
-const User = require("../model/user.model");
-
 const isAdmin = async(req,res,next)=>{
     try{
-        if(req.user.role !== 'Admin')
+        if(req.user.role !== 'admin')
             return res.status(403).json({ msg: 'Admin access required' });
         next();
     }catch (err) {
