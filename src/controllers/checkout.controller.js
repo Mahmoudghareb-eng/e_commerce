@@ -60,7 +60,7 @@ const checkout = async(req,res)=>{
             discount = total_price * (coupon.discount_percent/100);
             total_price-=discount;
         }
-        const order = await Order.createOrder(req.user.id,total_price,"pending",client);
+        const order = await Order.createOrder(req.user.id,total_price,"pending",code,discount,client);
         let order_items=[];
         for(const item of items){
             const orderItem = await Order_items.createOrderItem(

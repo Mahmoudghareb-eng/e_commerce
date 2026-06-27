@@ -5,6 +5,8 @@ const createOrder = async (
   user_id,
   total_price,
   status = 'pending',
+  coupon_code = null,
+  discount_amount = 0,
   client = db
 ) => {
   try {
@@ -13,11 +15,13 @@ const createOrder = async (
       `INSERT INTO orders (
           user_id,
           total_price,
+          coupon_code,
+          discount_amount,
           status
        )
-       VALUES ($1, $2, $3)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [user_id, total_price, status]
+      [user_id, total_price, coupon_code, discount_amount, status]
     );
 
     return result.rows[0];
