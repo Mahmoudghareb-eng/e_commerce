@@ -42,7 +42,19 @@ const createProduct = async (req, res) => {
 // GET ALL PRODUCTS
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.getProducts();
+    const page = parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit)||10;
+    const offset = (page-1)*limit;
+    const minPrice = req.query.minPrice? Number(req.query.minPrice) : null;
+    const maxPrice = req.query.maxPrice? Number(req.query.maxPrice) : null;
+    const products = await Product.getProducts(
+    req.query.search,
+    minPrice,
+    maxPrice,
+    req.query.sort,
+    limit,
+    offset
+  );
 
     return res.status(200).json(products);
 
