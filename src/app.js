@@ -1,5 +1,6 @@
 require("dotenv").config({ path: "../.env" });
 const express = require('express');
+const cookieParser = require("cookie-parser");
 const userRoute = require('./routes/user.route');
 const productRoute = require('./routes/product.route');
 const orderRoute = require('./routes/order.route');
@@ -11,7 +12,7 @@ const checkout = require('./routes/checkout.route');
 
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
 app.get('/',(req,res)=>{
     res.json({msg:'welcome to api'});
  });

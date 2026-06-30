@@ -2,7 +2,7 @@ require("dotenv").config({ path: "../.env" });
 const jwt = require("jsonwebtoken");
 
 //generate token
-const generateToken = (user)=>{
+const generateAccessToken  = (user)=>{
     const {id,email,role='user'} = user;
      
     return jwt.sign({id,email,role},
@@ -18,7 +18,23 @@ const verifyToken = (token)=>{
     }
 };
 
+const generateRefreshToken = (user)=>{
+   const {id,email,role='user'} = user;
+    return jwt.sign({id,email,role},
+        process.env.JWT_REFRESH_SECRET,{expiresIn: "7d"});
+}
+
+const verifyRefreshToken = (token)=>{
+    try{
+        return jwt.verify(token,process.env.JWT_REFRESH_SECRET);
+    }catch(err){
+        throw new Error("Invalid or expired token");
+    }
+};
+
 module.exports = {
-    generateToken,
-    verifyToken
+    generateAccessToken,
+    generateRefreshToken,
+    verifyToken,
+    verifyRefreshToken
 }
