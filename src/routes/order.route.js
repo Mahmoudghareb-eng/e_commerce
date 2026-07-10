@@ -15,9 +15,6 @@ const isAdmin = require('../middleware/isAdmin');
 const router = express.Router();
 
 
-// CREATE ORDER
-router.post('/', auth, createOrder);
-
 // GET USER ORDERS
 router.get('/', auth, getOrders);
 
