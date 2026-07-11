@@ -1,47 +1,8 @@
 const db = require('../config/db');
 const Order = require("../model/order.model");
-const User = require("../model/user.model");
 const Product = require("../model/product.model");
 const Order_items = require("../model/orderItem.model");
 
-const createOrder = async (req, res) => {
-  try {
-    const user_id = req.user.id;
-    const { total_price, status } = req.body;
-
-    //check total_price
-    if (total_price == null || isNaN(total_price) || total_price <= 0) {
-      return res.status(400).json({
-        msg: "total_price must be a valid number greater than 0"
-      });
-    }
-
-    //check status 
-    const allowedStatus = ["pending", "paid", "shipped", "delivered"];
-
-    if (status && !allowedStatus.includes(status)) {
-      return res.status(400).json({
-        msg: "Invalid status value"
-      });
-    }
-
-    // create order
-    const order = await Order.createOrder(
-      user_id,
-      total_price,
-      status || "pending"
-    );
-
-    return res.status(201).json({
-      message: "Order created successfully",
-      order
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
-  }
-};
 
 const getOrders = async (req, res) => {
   try {
@@ -64,9 +25,7 @@ const getOrderById = async (req, res) => {
   try {
     const id = req.params.id;
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ msg: "Invalid order id" });
-    }
+
 
     const order = await Order.getOrderById(id);
 
@@ -75,7 +34,7 @@ const getOrderById = async (req, res) => {
     }
 
     //authorization CHECK
-    if (order.user_id !== req.user.id) {
+    if (req.user.role !== "admin" && order.user_id !== req.user.id) {
       return res.status(403).json({ msg: "Not allowed" });
     }
 
@@ -99,17 +58,6 @@ const updateOrderStatus = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ msg: "Order not found" });
-    }
-
-    //authorization
-    if (order.user_id !== req.user.id) {
-      return res.status(403).json({ msg: "Not allowed" });
-    }
-
-    const allowedStatus = ["pending", "paid", "shipped", "delivered"];
-
-    if (!status || !allowedStatus.includes(status)) {
-      return res.status(400).json({ msg: "Invalid status" });
     }
 
     const updatedOrder = await Order.updateOrderStatus(id, status);
@@ -196,11 +144,6 @@ const deleteOrder = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ msg: "Order not found" });
-    }
-
-    //authorization
-    if (order.user_id !== req.user.id) {
-      return res.status(403).json({ msg: "Not allowed" });
     }
 
     await Order.deleteOrder(id);
