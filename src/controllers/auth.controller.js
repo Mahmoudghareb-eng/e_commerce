@@ -11,12 +11,7 @@ const crypto = require("crypto");
 const rigster = async(req,res)=>{
     try{
         const {name,email,password} = req.body;
-        if(!name?.trim() || !email?.trim() || !password?.trim()){
-            return res.status(400).json({ msg: "All fields are required" });
-        }
-        if (password.length < 6) {
-        return res.status(400).json({ msg: "Password must be at least 6 characters" });
-        }
+
         const emailLower = email.toLowerCase();
     
         // check email exists
@@ -70,10 +65,7 @@ const rigster = async(req,res)=>{
 const login = async(req,res)=>{
     try{
     const {email,password} = req.body;
-    // validation
-    if (!email?.trim() || !password?.trim()) {
-      return res.status(400).json({ msg: "All fields are required" });
-    }
+
     const emailLower = email.toLowerCase();
 
     // check email exists
@@ -149,7 +141,7 @@ const refresh = async(req,res)=>{
 
     const isExist = await refresh_token.getRefreshToken(hashToken);
 
-    if(!isExist||isExist.expires_at < new Date()||isExist.revoked)
+    if(!isExist)
         return res.status(401).json({ msg: "Invalid refresh token" });
 
     const user = await User.getUserById(payload.id);

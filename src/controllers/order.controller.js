@@ -159,7 +159,6 @@ const deleteOrder = async (req, res) => {
 };
 
 module.exports = {
-    createOrder,
     getOrders,
     getOrderById,
     updateOrderStatus,

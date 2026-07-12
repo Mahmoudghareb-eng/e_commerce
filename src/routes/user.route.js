@@ -5,12 +5,14 @@ const { getMe, updateProfile, deleteUser } = require("../controllers/user.contro
 
 const auth = require("../middleware/auth.middleware");
 const {authLimiter, refreshLimiter} = require("../middleware/rateLimit.middleware");
+const {loginValidation, rigsterValidation} = require("../validators/auth.validators");
+const validate = require("../middleware/validator.middleware")
 
 const router = express.Router();
 
 // auth routes
-router.post('/register', authLimiter, rigster);
-router.post('/login', authLimiter, login);
+router.post('/register', authLimiter, rigsterValidation, validate, rigster);
+router.post('/login', authLimiter, loginValidation, validate, login);
 router.post('/refresh', refreshLimiter, refresh);
 router.post('/logout', refreshLimiter, logout);
 

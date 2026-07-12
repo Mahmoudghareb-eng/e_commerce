@@ -6,18 +6,6 @@ const createProduct = async (req, res) => {
   try {
     const { name, description, price, quantity } = req.body;
 
-    // validation
-    if (
-      !name?.trim() ||
-      !description?.trim() ||
-      price == null ||
-      quantity == null
-    ) {
-      return res.status(400).json({
-        msg: "All fields are required"
-      });
-    }
-
     const product = await Product.addProduct(
       name.trim(),
       description.trim(),

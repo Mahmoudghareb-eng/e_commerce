@@ -6,15 +6,6 @@ const addItemToCart = async (req, res) => {
   try {
     const { product_id, quantity } = req.body;
 
-    // validation
-    if (!product_id) {
-      return res.status(400).json({ msg: "Product id is required" });
-    }
-
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({msg: "Quantity must be greater than 0"});
-    }
-
     // check product
     const product = await Product.getProductById(product_id);
 
@@ -82,10 +73,6 @@ const updateCartItemQuantity = async (req, res) => {
   try {
     const { id } = req.params;
     const { quantity } = req.body;
-
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({msg: "Quantity must be greater than 0"});
-    }
 
     const cart = req.cart;
 
