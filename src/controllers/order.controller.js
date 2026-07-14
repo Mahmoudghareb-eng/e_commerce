@@ -4,7 +4,7 @@ const Product = require("../model/product.model");
 const Order_items = require("../model/orderItem.model");
 
 
-const getOrders = async (req, res) => {
+const getMyOrders = async (req, res) => {
   try {
     const user_id = req.user.id;
 
@@ -24,8 +24,6 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const id = req.params.id;
-
-
 
     const order = await Order.getOrderById(id);
 
@@ -159,7 +157,7 @@ const deleteOrder = async (req, res) => {
 };
 
 module.exports = {
-    getOrders,
+    getMyOrders,
     getOrderById,
     updateOrderStatus,
     cancelOrder,

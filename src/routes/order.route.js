@@ -1,7 +1,7 @@
 const express = require('express');
 
 const {
-  getOrders,
+  getMyOrders,
   getOrderById,
   updateOrderStatus,
   cancelOrder,
@@ -18,7 +18,7 @@ const router = express.Router();
 
 
 // GET USER ORDERS
-router.get('/', auth, getOrders);
+router.get('/myorders', auth, getMyOrders);
 
 // GET ORDER BY ID
 router.get('/:id', auth, idValidation, getOrderById);

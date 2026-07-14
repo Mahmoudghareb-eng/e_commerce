@@ -5,7 +5,8 @@ const {
 const User = require("../model/user.model");
 const refresh_token = require("../model/refreshToken.model");
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+const hashRefreshToken = require("../utility/hash.utility");
+const { refreshCookieOptions, clearRefreshCookieOptions } = require("../config/cookie");
 
 //rigster
 const rigster = async(req,res)=>{
@@ -33,18 +34,10 @@ const rigster = async(req,res)=>{
             email:user.email
         });
 
-        const hashToken = await crypto
-        .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-        .update(refreshToken)
-        .digest("hex");
+        const hashToken = hashRefreshToken(refreshToken);
         await refresh_token.createRefreshToken(user.id,hashToken);
 
-        res.cookie("refreshToken",refreshToken,{
-            httpOnly: true,
-            secure:true,
-            sameSite: "Strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000 
-        });
+        res.cookie("refreshToken",refreshToken,refreshCookieOptions);
 
         return res.status(201).json({
         message: "User created successfully",
@@ -86,10 +79,7 @@ const login = async(req,res)=>{
     const oldRefreshToken = req.cookies?.refreshToken;
 
     if (oldRefreshToken) {
-    const oldHashToken = crypto
-    .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-    .update(oldRefreshToken)
-    .digest("hex");
+    const oldHashToken = hashRefreshToken(oldRefreshToken);
 
     await refresh_token.revokeRefreshToken(oldHashToken);
     }
@@ -99,19 +89,12 @@ const login = async(req,res)=>{
         email:user.email,
         role:user.role
     });
-    const hashToken = await crypto
-    .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-    .update(refreshToken)
-    .digest("hex");
+    const hashToken = hashRefreshToken(refreshToken);
     await refresh_token.createRefreshToken(user.id,hashToken);
-    res.cookie("refreshToken",refreshToken,{
-    httpOnly: true,
-    secure:true,
-    sameSite: "Strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000 
-    });
+    res.cookie("refreshToken",refreshToken,refreshCookieOptions);
+
     return res.status(200).json({
-        message: "User logedin successfully",
+        message: "User logged in successfully",
         accessToken,
         user: {
         id: user.id,
@@ -134,10 +117,7 @@ const refresh = async(req,res)=>{
         return res.status(401).json({msg:"refresh token not exits"})
     }  
     const payload = verifyRefreshToken(RefreshToken);
-    const hashToken = await crypto
-    .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-    .update(RefreshToken)
-    .digest("hex");
+    const hashToken = hashRefreshToken(RefreshToken);
 
     const isExist = await refresh_token.getRefreshToken(hashToken);
 
@@ -154,28 +134,17 @@ const refresh = async(req,res)=>{
         role: user.role
     });
     
-
-
     await refresh_token.revokeRefreshToken(hashToken);
-    
 
     const newRefreshToken = generateRefreshToken({
         id:user.id,
         email:user.email,
         role:user.role
     });
-    const newHashToken = await crypto
-    .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-    .update(newRefreshToken)
-    .digest("hex");
+    const newHashToken = hashRefreshToken(newRefreshToken);
     await refresh_token.createRefreshToken(user.id,newHashToken);
 
-    res.cookie("refreshToken",newRefreshToken,{
-    httpOnly: true,
-    secure:true,
-    sameSite: "Strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000 
-    });
+    res.cookie("refreshToken",newRefreshToken,refreshCookieOptions);
 
     return res.status(200).json({
         message: "User refresh successfully",
@@ -209,18 +178,11 @@ const logout = async (req, res) => {
             });
         }
 
-        const hashToken = crypto
-            .createHmac("sha256", process.env.REFRESH_TOKEN_HASH_SECRET)
-            .update(refreshToken)
-            .digest("hex");
+        const hashToken = hashRefreshToken(refreshToken);
 
         await refresh_token.revokeRefreshToken(hashToken);
 
-        res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure:true,
-            sameSite: "Strict"
-        });
+        res.clearCookie("refreshToken", clearRefreshCookieOptions);
 
         return res.status(200).json({
             msg: "Logged out successfully"
