@@ -1,54 +1,42 @@
 const Order_items = require('../model/orderItem.model');
 const Product = require('../model/product.model');
 const Order = require('../model/order.model');
-
+const AppError = require("../middleware/error.middleware");
 
 // CREATE ORDER ITEM
-const createOrderItems = async (req, res) => {
+const createOrderItems = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const {order_id,product_id,quantity} = req.body;
 
     // VALIDATION
     if (!order_id || !product_id) {
-      return res.status(400).json({
-        msg: "order_id and product_id are required"
-      });
+      throw new AppError("order_id and product_id are required",400);
     }
     if (!quantity || quantity <= 0) {
-      return res.status(400).json({
-        msg: "Quantity must be greater than 0"
-      });
+      throw new AppError("Quantity must be greater than 0",400);
     }
 
     // CHECK ORDER EXISTS
     const order = await Order.getOrderById(order_id);
     if (!order) {
-      return res.status(404).json({
-        msg: "Order not found"
-      });
+      throw new AppError("Order not found",404);
     }
 
     // AUTHORIZATION CHECK
     if (order.user_id !== user_id) {
-      return res.status(403).json({
-        msg: "Not allowed"
-      });
+      throw new AppError("Not allowed",403);
     }
 
     // CHECK PRODUCT EXISTS
     const product = await Product.getProductById(product_id);
     if (!product) {
-      return res.status(404).json({
-        msg: "Product not found"
-      });
+      throw new AppError("Product not found",404);
     }
 
     // OPTIONAL STOCK CHECK
     if (quantity > product.quantity) {
-      return res.status(400).json({
-        msg: "Insufficient stock"
-      });
+      throw new AppError("Insufficient stock",400);
     }
 
     // GET REAL PRICE FROM DATABASE
@@ -62,13 +50,12 @@ const createOrderItems = async (req, res) => {
       order_item
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({msg: "Server error"});
+    next(err);
   }
 };
 
 // GET ITEMS BY ORDER ID
-const getItemsByOrderId = async (req, res) => {
+const getItemsByOrderId = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const order_id = req.params.order_id;
@@ -76,16 +63,12 @@ const getItemsByOrderId = async (req, res) => {
     // CHECK ORDER EXISTS
     const order = await Order.getOrderById(order_id);
     if (!order) {
-      return res.status(404).json({
-        msg: "Order not found"
-      });
+      throw new AppError("Order not found",404);
     }
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
-      return res.status(403).json({
-        msg: "Not allowed"
-      });
+      throw new AppError("Not allowed",403);
     }
 
     // GET ITEMS
@@ -96,13 +79,12 @@ const getItemsByOrderId = async (req, res) => {
       order_items
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({msg: "Server error"});
+    next(err);
   }
 };
 
 // GET ORDER ITEM BY ID
-const getOrderItemById = async (req, res) => {
+const getOrderItemById = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const id = req.params.id;
@@ -110,9 +92,7 @@ const getOrderItemById = async (req, res) => {
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
-      return res.status(404).json({
-        msg: "Order item not found"
-      });
+      throw new AppError("Order item not found",404);      
     }
 
     // GET ORDER
@@ -120,9 +100,7 @@ const getOrderItemById = async (req, res) => {
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
-      return res.status(403).json({
-        msg: "Not allowed"
-      });
+      throw new AppError("Not allowed",403);
     }
 
     return res.status(200).json({
@@ -131,15 +109,12 @@ const getOrderItemById = async (req, res) => {
     });
 
   }catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 // UPDATE ORDER ITEM
-const updateOrderItem = async (req, res) => {
+const updateOrderItem = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const id = req.params.id;
@@ -147,17 +122,13 @@ const updateOrderItem = async (req, res) => {
 
     // VALIDATION
     if (!quantity || quantity <= 0) {
-      return res.status(400).json({
-        msg: "Quantity must be greater than 0"
-      });
+      throw new AppError("Quantity must be greater than 0",400);
     }
 
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
-      return res.status(404).json({
-        msg: "Order item not found"
-      });
+      throw new AppError("Order item not found",404);
     }
 
     // GET ORDER
@@ -165,9 +136,7 @@ const updateOrderItem = async (req, res) => {
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
-      return res.status(403).json({
-        msg: "Not allowed"
-      });
+      throw new AppError("Not allowed",403);
     }
 
     // UPDATE ITEM
@@ -179,15 +148,12 @@ const updateOrderItem = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 // DELETE ORDER ITEM
-const deleteOrderItem = async (req, res) => {
+const deleteOrderItem = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const id = req.params.id;
@@ -195,9 +161,7 @@ const deleteOrderItem = async (req, res) => {
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
-      return res.status(404).json({
-        msg: "Order item not found"
-      });
+      throw new AppError("Order item not found",404);
     }
 
     // GET ORDER
@@ -208,6 +172,7 @@ const deleteOrderItem = async (req, res) => {
       return res.status(403).json({
         msg: "Not allowed"
       });
+      throw new AppError("Not allowed",403);
     }
 
     // DELETE ITEM
@@ -218,10 +183,7 @@ const deleteOrderItem = async (req, res) => {
       order_item: deletedItem
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 

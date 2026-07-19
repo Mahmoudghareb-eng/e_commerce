@@ -2,9 +2,10 @@ const db = require('../config/db');
 const Order = require("../model/order.model");
 const Product = require("../model/product.model");
 const Order_items = require("../model/orderItem.model");
+const AppError = require("../middleware/error.middleware");
 
 
-const getMyOrders = async (req, res) => {
+const getMyOrders = async (req, res, next) => {
   try {
     const user_id = req.user.id;
 
@@ -16,24 +17,23 @@ const getMyOrders = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
-const getOrderById = async (req, res) => {
+const getOrderById = async (req, res, next) => {
   try {
     const id = req.params.id;
 
     const order = await Order.getOrderById(id);
 
     if (!order) {
-      return res.status(404).json({ msg: "Order not found" });
+      throw new AppError("Order not found",404);
     }
 
     //authorization CHECK
     if (req.user.role !== "admin" && order.user_id !== req.user.id) {
-      return res.status(403).json({ msg: "Not allowed" });
+      throw new AppError("Not allowed",403);
     }
 
     return res.status(200).json({
@@ -42,12 +42,11 @@ const getOrderById = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res, next) => {
   try {
     const id = req.params.id;
     const { status } = req.body;
@@ -55,7 +54,7 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.getOrderById(id);
 
     if (!order) {
-      return res.status(404).json({ msg: "Order not found" });
+      throw new AppError("Order not found",404);
     }
 
     const updatedOrder = await Order.updateOrderStatus(id, status);
@@ -66,12 +65,11 @@ const updateOrderStatus = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
-const cancelOrder = async(req,res)=>{
+const cancelOrder = async(req,res,next)=>{
   let client;
   try{
     client = await db.connect();
@@ -81,16 +79,15 @@ const cancelOrder = async(req,res)=>{
     //get order
     const order = await Order.getOrderById(orderId,client);
     if(!order){
-      const err = new Error('Order Not Found');
-      err.status=404;
-      throw err;
+      throw new AppError('Order Not Found',404);
     } 
 
     //authorization
     if(order.user_id !== req.user.id){
       const err = new Error('Not allowed');
       err.status=403;
-      throw err;
+      throw err
+      
     }
 
     //check status

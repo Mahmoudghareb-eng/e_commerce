@@ -1,8 +1,9 @@
 const Cart_item = require('../model/cartItem.model');
 const Product = require('../model/product.model');
+const AppError = require("../middleware/error.middleware");
 
 // ADD ITEM TO CART
-const addItemToCart = async (req, res) => {
+const addItemToCart = async (req, res, next) => {
   try {
     const { product_id, quantity } = req.body;
 
@@ -10,11 +11,11 @@ const addItemToCart = async (req, res) => {
     const product = await Product.getProductById(product_id);
 
     if (!product) {
-      return res.status(404).json({ msg: "Product not found" });
+      throw new AppError("Product not found",404);
     }
 
     if (product.quantity <= 0) {
-      return res.status(400).json({msg: "Product out of stock"});
+      throw new AppError("Product out of stock",400);
     }
 
     const cart = req.cart;
@@ -28,7 +29,7 @@ const addItemToCart = async (req, res) => {
       const newQuantity = isExist.quantity + quantity;
 
       if (newQuantity > product.quantity) {
-        return res.status(400).json({msg: "Not enough stock"});
+        throw new AppError("Not enough stock",400);
       }
       cartItem = await Cart_item.updateCartItemQuantity(
         isExist.id,
@@ -36,7 +37,7 @@ const addItemToCart = async (req, res) => {
       );
     } else {
       if (quantity > product.quantity) {
-        return res.status(400).json({msg: "Not enough stock"});
+        throw new AppError("Not enough stock",400);
       }
       cartItem = await Cart_item.addItemToCart(cart.id,product_id,quantity);
     }
@@ -46,14 +47,13 @@ const addItemToCart = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // GET CART ITEMS
-const getCartItems = async (req, res) => {
+const getCartItems = async (req, res, next) => {
   try {
     const cart = req.cart;
 
@@ -62,14 +62,13 @@ const getCartItems = async (req, res) => {
     return res.status(200).json({ cartItems });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // UPDATE ITEM QUANTITY
-const updateCartItemQuantity = async (req, res) => {
+const updateCartItemQuantity = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { quantity } = req.body;
@@ -80,23 +79,23 @@ const updateCartItemQuantity = async (req, res) => {
     const item = await Cart_item.getCartItemById(id);
 
     if (!item) {
-      return res.status(404).json({msg: "Cart item not found"});
+      throw new AppError("Cart item not found",404);
     }
 
     // ownership check
     if (cart.id !== item.cart_id) {
-      return res.status(403).json({msg: "Not allowed"});
+      throw new AppError("Not allowed",403);
     }
 
     // check product stock
     const product = await Product.getProductById(item.product_id);
 
     if (!product) {
-      return res.status(404).json({msg: "Product not found"});
+      throw new AppError("Product not found",404);
     }
 
     if (quantity > product.quantity) {
-      return res.status(400).json({msg: "Not enough stock"});
+      throw new AppError("Not enough stock",400);
     }
 
     const updated = await Cart_item.updateCartItemQuantity(id, quantity);
@@ -107,14 +106,13 @@ const updateCartItemQuantity = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // REMOVE CART ITEM
-const removeCartItem = async (req, res) => {
+const removeCartItem = async (req, res, next) => {
   try {
     const { id } = req.params;
     const cart = req.cart;
@@ -122,11 +120,11 @@ const removeCartItem = async (req, res) => {
     const item = await Cart_item.getCartItemById(id);
 
     if (!item) {
-      return res.status(404).json({msg: "Cart item not found"});
+      throw new AppError("Cart item not found",404); 
     }
 
     if (cart.id !== item.cart_id) {
-      return res.status(403).json({msg: "Not allowed"});
+      throw new AppError("Not allowed",403);
     }
 
     const cartItem = await Cart_item.removeCartItem(id);
@@ -137,8 +135,7 @@ const removeCartItem = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 

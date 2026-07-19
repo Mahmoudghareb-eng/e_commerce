@@ -1,27 +1,27 @@
 const User = require("../model/user.model");
+const AppError = require("../middleware/error.middleware");
 
 // GET ME
-const getMe = async (req, res) => {
+const getMe = async (req, res, next) => {
   try {
     const id = req.user.id;
 
     const user = await User.getUserById(id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      throw new AppError("User not found",404);
     }
 
     res.status(200).json({ user });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // UPDATE PROFILE
-const updateProfile = async (req, res) => {
+const updateProfile = async (req, res, next) => {
   try {
     const id = req.user.id;
 
@@ -30,7 +30,7 @@ const updateProfile = async (req, res) => {
     const user = await User.getUserById(id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      throw new AppError("User not found",404);
     }
 
     const updatedUser = await User.updateUser(
@@ -45,21 +45,20 @@ const updateProfile = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // DELETE USER
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     const id = req.user.id;
 
     const user = await User.getUserById(id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      throw new AppError("User not found",404);
     }
 
     await User.deleteUser(id);
@@ -69,8 +68,7 @@ const deleteUser = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 

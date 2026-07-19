@@ -1,14 +1,15 @@
 const Cart = require('../model/cart.model');
+const AppError = require("../middleware/error.middleware");
 
 // CREATE CART
-const createCart = async (req, res) => {
+const createCart = async (req, res, next) => {
   try {
     const user_id = req.user.id;
     const existingCart = await Cart.getCartbyUser(user_id);
 
     if (existingCart) {
-    return res.status(400).json({msg: "Cart already exists"});
-  }
+      throw new AppError("Cart already exists",400);
+    }
     const cart = await Cart.createCart(user_id);
 
     return res.status(201).json({
@@ -17,14 +18,13 @@ const createCart = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // GET CART BY USER
-const getCartbyUser = async (req, res) => {
+const getCartbyUser = async (req, res, next) => {
   try {
 
     const cart = req.cart;
@@ -32,14 +32,13 @@ const getCartbyUser = async (req, res) => {
     return res.status(200).json({ cart });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // CLEAR CART
-const clearCart = async (req, res) => {
+const clearCart = async (req, res, next) => {
   try {
 
     const cart = req.cart;
@@ -51,14 +50,13 @@ const clearCart = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 
 
 // DELETE CART
-const deleteCart = async (req, res) => {
+const deleteCart = async (req, res, next) => {
   try {
 
     const cart = req.cart;
@@ -69,8 +67,7 @@ const deleteCart = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 

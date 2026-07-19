@@ -1,33 +1,32 @@
 const Coupons = require('../model/coupons.model');
+const AppError = require("../middleware/error.middleware");
 
-const createCoupon = async(req,res)=>{
+const createCoupon = async(req,res,next)=>{
     try{
     const {code,discount_percent,expires_at} = req.body;
 
     const existingCoupon = await Coupons.getCouponsByCode(code);
     if(existingCoupon){
-    return res.status(400).json({msg: "Coupon already exists"});
+    throw new AppError("Coupon already exists",400);
     }
     const coupon = await Coupons.addCoupons(code,discount_percent,expires_at);
     return res.status(201).json({msg:"create successfully",coupon});
     }catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+      next(err);
   }
 };
 
-const getCouponsByCode = async(req,res)=>{
+const getCouponsByCode = async(req,res,next)=>{
     try{
     const {code} = req.params;
    
     const coupon = await Coupons.getCouponsByCode(code);
     if (!coupon) {
-    return res.status(404).json({msg: "Coupon not found"});
+    throw new AppError("Coupon not found",404);
     }
     return res.status(200).json({coupon});
     }catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+      next(err);
   }
 };
 
@@ -37,12 +36,11 @@ const deleteCoupons = async(req,res)=>{
    
     const coupon = await Coupons.deleteCoupons(code);
     if (!coupon) {
-    return res.status(404).json({msg: "Coupon not found"});
+    throw new AppError("Coupon not found",404);
     }
     return res.status(200).json({coupon});
     }catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Server error" });
+      next(err);
   }    
 };
 

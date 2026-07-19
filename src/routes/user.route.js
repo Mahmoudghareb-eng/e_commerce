@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { rigster, login, refresh, logout } = require("../controllers/auth.controller");
+const { register, login, refresh, logout } = require("../controllers/auth.controller");
 const { getMe, updateProfile, deleteUser } = require("../controllers/user.controller");
 
 const auth = require("../middleware/auth.middleware");
@@ -11,7 +11,7 @@ const validate = require("../middleware/validator.middleware")
 const router = express.Router();
 
 // auth routes
-router.post('/register', authLimiter, rigsterValidation, validate, rigster);
+router.post('/register', authLimiter, rigsterValidation, validate, register);
 router.post('/login', authLimiter, loginValidation, validate, login);
 router.post('/refresh', refreshLimiter, refresh);
 router.post('/logout', refreshLimiter, logout);

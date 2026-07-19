@@ -9,6 +9,7 @@ const cartRoute = require('./routes/cart.route');
 const cartItemRoute = require('./routes/cartItem.route');
 const couponRoute = require('./routes/coupons.route');
 const checkout = require('./routes/checkout.route');
+const errorHandler = require("./middleware/error.middleware");
 
 const app = express();
 app.use(express.json());
@@ -30,6 +31,7 @@ app.use((req, res) => {
   res.status(404).json({ msg: "Route not found" });
 });
 
+app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
 

@@ -1,8 +1,9 @@
 const Product = require("../model/product.model");
+const AppError = require("../middleware/error.middleware");
 
 
 // CREATE PRODUCT
-const createProduct = async (req, res) => {
+const createProduct = async (req, res, next) => {
   try {
     const { name, description, price, quantity } = req.body;
 
@@ -19,16 +20,13 @@ const createProduct = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 
 // GET ALL PRODUCTS
-const getProducts = async (req, res) => {
+const getProducts = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page)||1;
     const limit = parseInt(req.query.limit)||10;
@@ -47,40 +45,32 @@ const getProducts = async (req, res) => {
     return res.status(200).json(products);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 
 // GET PRODUCT BY ID
-const getProductById = async (req, res) => {
+const getProductById = async (req, res, next) => {
   try {
     const id = req.params.id;
 
     const product = await Product.getProductById(id);
 
     if (!product) {
-      return res.status(404).json({
-        msg: "Product not found"
-      });
+      throw new AppError("Product not found",404);
     }
 
     return res.status(200).json(product);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 
 // UPDATE PRODUCT
-const updateProduct = async (req, res) => {
+const updateProduct = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -89,9 +79,7 @@ const updateProduct = async (req, res) => {
     const isExist = await Product.getProductById(id);
 
     if (!isExist) {
-      return res.status(404).json({
-        msg: "Product not found"
-      });
+      throw new AppError("Product not found",404);
     }
 
     const updatedProduct = await Product.updateProduct(
@@ -106,25 +94,20 @@ const updateProduct = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 
 
 // DELETE PRODUCT
-const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
   try {
     const id = req.params.id;
 
     const isExist = await Product.getProductById(id);
 
     if (!isExist) {
-      return res.status(404).json({
-        msg: "Product not found"
-      });
+      throw new AppError("Product not found",404);
     }
 
     await Product.deleteProduct(id);
@@ -134,10 +117,7 @@ const deleteProduct = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      msg: "Server error"
-    });
+    next(err);
   }
 };
 

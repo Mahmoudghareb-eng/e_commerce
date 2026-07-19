@@ -5,8 +5,9 @@ const Product = require('../model/product.model');
 const Order = require('../model/order.model');
 const Order_items = require('../model/orderItem.model');
 const Coupon = require('../model/coupons.model');
+const AppError = require("../middleware/error.middleware");
 
-const checkout = async(req,res)=>{
+const checkout = async(req,res,next)=>{
     let client;
     try{
         client = await db.connect()   
@@ -16,9 +17,7 @@ const checkout = async(req,res)=>{
         const {code} = req.body;
         const items = await Cart_item.getCartItems(cart.id,client);
         if(items.length === 0){
-            const err = new Error(`cart is empty`);
-            err.status=400;
-            throw err;
+            throw new AppError("cart is empty",400);
         }
         const productsIds = items.map(item=>item.product_id);
         const productRows = await Product.getProductsByIds(productsIds,client);
@@ -29,14 +28,10 @@ const checkout = async(req,res)=>{
         for(const item of items){
             const product = products[item.product_id];
             if (!product) {
-                const err = new Error(`Product ${item.product_id} not found`);
-                err.status=404;
-                throw err;
+                throw new AppError(`Product ${item.product_id} not found`,404);
             }
             if(product.quantity<item.quantity){
-                const err = new Error(`${product.name} does not have enough stock`);
-                err.status=400;
-                throw err;                
+                throw new AppError(`${product.name} does not have enough stock`,400);                
             }
         }
         let total_price = 0;
@@ -48,14 +43,10 @@ const checkout = async(req,res)=>{
         if(code){
             coupon = await Coupon.getCouponsByCode(code,client);
             if(!coupon){
-                const err = new Error('Invalid Coupon')
-                err.status=400
-                throw err;                
+                throw new AppError('Invalid Coupon',400);                
             }
             if(coupon.expires_at&&new Date(coupon.expires_at)<new Date()){
-                const err = new Error('Coupon expired');
-                err.status=400
-                throw err;
+                throw new AppError('Coupon expired',400);
             }
             discount = total_price * (coupon.discount_percent/100);
             total_price-=discount;
@@ -83,7 +74,7 @@ const checkout = async(req,res)=>{
 });
     } catch (err) {
     if (client) await client.query('ROLLBACK');
-    res.status(err.status||500).json({ msg: err.message||"Server error" });
+    next(err);
   }finally{
     if (client) client.release()
   }

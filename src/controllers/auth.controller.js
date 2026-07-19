@@ -7,9 +7,10 @@ const refresh_token = require("../model/refreshToken.model");
 const bcrypt = require("bcrypt");
 const hashRefreshToken = require("../utility/hash.utility");
 const { refreshCookieOptions, clearRefreshCookieOptions } = require("../config/cookie");
+const AppError = require("../middleware/error.middleware");
 
 //rigster
-const rigster = async(req,res)=>{
+const register = async(req,res,next)=>{
     try{
         const {name,email,password} = req.body;
 
@@ -18,7 +19,7 @@ const rigster = async(req,res)=>{
         // check email exists
         const existingUser = await User.getUserByEmail(emailLower);
         if (existingUser) {
-          return res.status(400).json({ msg: "Email already exists" });
+            throw new AppError("Email already exists",400);
         }
     
         //hash
@@ -49,13 +50,12 @@ const rigster = async(req,res)=>{
       }
     });
     }catch(err){
-        console.error(err);
-        res.status(500).json({ msg: "Server error" });
+        next(err);
     }
 };
 
 //login
-const login = async(req,res)=>{
+const login = async(req,res,next)=>{
     try{
     const {email,password} = req.body;
 
@@ -64,11 +64,11 @@ const login = async(req,res)=>{
     // check email exists
     const user = await User.getUserByEmail(emailLower);
     if (!user) {
-        return res.status(401).json({ msg: "Invalid email or password" });
+        throw new AppError("Invalid email or password",401);
     }
     const isMatch = await bcrypt.compare(password,user.password);
     if (!isMatch) {
-      return res.status(401).json({ msg: "Invalid email or password" });
+        throw new AppError("Invalid email or password",401);
     }
     const accessToken = generateAccessToken({
         id:user.id,
@@ -103,30 +103,30 @@ const login = async(req,res)=>{
       }        
     })
     }catch(err){
-        console.error(err);
-        res.status(500).json({ msg: "Server error" });
+        next(err);
     }
 };
 
 //refresh
-const refresh = async(req,res)=>{
+const refresh = async(req,res,next)=>{
     try{
      const RefreshToken = req.cookies?.refreshToken;
 
     if (!RefreshToken) {
-        return res.status(401).json({msg:"refresh token not exits"})
+        throw new AppError("refresh token not found",401);
     }  
     const payload = verifyRefreshToken(RefreshToken);
     const hashToken = hashRefreshToken(RefreshToken);
 
     const isExist = await refresh_token.getRefreshToken(hashToken);
 
-    if(!isExist)
-        return res.status(401).json({ msg: "Invalid refresh token" });
+    if(!isExist){
+        throw new AppError("Invalid refresh token",401);
+    }
 
     const user = await User.getUserById(payload.id);
     if (!user) {
-        return res.status(404).json({msg: "User not found"});
+        throw new AppError("User not found",404);
     }
     const accessToken = generateAccessToken({
         id: user.id,
@@ -155,27 +155,20 @@ const refresh = async(req,res)=>{
         err.name === "TokenExpiredError" ||
         err.name === "JsonWebTokenError"
     ) {
-        return res.status(401).json({
-            msg: "Invalid or expired refresh token"
-        });
+        err.status = 401;
+        err.message = "Invalid or expired refresh token";
     }
-
-    console.error(err);
-    return res.status(500).json({
-        msg: "Server error"
-    });
+    next(err);
     }
 };
 
 //logout
-const logout = async (req, res) => {
+const logout = async (req,res,next) => {
     try {
         const refreshToken = req.cookies?.refreshToken;
 
         if (!refreshToken) {
-            return res.status(401).json({
-                msg: "Refresh token not found"
-            });
+            throw new AppError("Refresh token not found",401);
         }
 
         const hashToken = hashRefreshToken(refreshToken);
@@ -189,15 +182,12 @@ const logout = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            msg: "Server error"
-        });
+        next(err);
     }
 };
 
 module.exports={
-    rigster,
+    register,
     login,
     refresh,
     logout
