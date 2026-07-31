@@ -44,11 +44,8 @@ app.use('/api/cart',cartRoute);
 app.use('/api/coupons',couponRoute);
 app.use('/api/checkout',checkout);
 
-app.use(
-    "/api-docs",
-    swaggerUI.serve,
-    swaggerUI.setup(swaggerSpec)
-);
+const swaggerDoc = require('./config/swaggerDoc');
+swaggerDoc(app);
 
 app.use((req, res) => {
   res.status(404).json({ msg: "Route not found" });
