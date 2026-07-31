@@ -1,9 +1,9 @@
 const { param } = require("express-validator");
 
-const idValidation = [
-    param("id")
-        .isInt({ min: 1 })
-        .withMessage("Invalid id")
+const idValidation = (paramName = "id") => [
+  param(paramName)
+    .isInt({ min: 1 })
+    .withMessage(`Invalid ${paramName}`)
 ];
 
 module.exports = idValidation;

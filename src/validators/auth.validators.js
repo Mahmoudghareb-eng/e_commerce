@@ -10,7 +10,7 @@ const loginValidation = [
     .withMessage("Password must be at least 6 characters")
 ];
 
-const rigsterValidation = [
+const registerValidation = [
   body("name")
    .notEmpty()
    .withMessage("Name is required"),
@@ -26,5 +26,5 @@ const rigsterValidation = [
 
 module.exports = {
   loginValidation,
-  rigsterValidation
+  registerValidation
 };

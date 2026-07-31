@@ -1,5 +1,10 @@
 require("dotenv").config({ path: "../.env" });
 const express = require('express');
+const cors = require("cors");
+const compression = require("compression");
+const helmet = require("helmet");
+const swaggerUI = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 const cookieParser = require("cookie-parser");
 const userRoute = require('./routes/user.route');
 const productRoute = require('./routes/product.route');
@@ -12,8 +17,20 @@ const checkout = require('./routes/checkout.route');
 const errorHandler = require("./middleware/error.middleware");
 
 const app = express();
+app.use(
+    helmet({
+        contentSecurityPolicy: false,
+        crossOriginEmbedderPolicy: false
+    })
+);
+app.use(
+    cors({
+      origin: process.env.CLIENT_URL,
+      credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
+app.use(compression());
 app.get('/',(req,res)=>{
     res.json({msg:'welcome to api'});
  });
@@ -26,6 +43,12 @@ app.use('/api/cart/items',cartItemRoute);
 app.use('/api/cart',cartRoute);
 app.use('/api/coupons',couponRoute);
 app.use('/api/checkout',checkout);
+
+app.use(
+    "/api-docs",
+    swaggerUI.serve,
+    swaggerUI.setup(swaggerSpec)
+);
 
 app.use((req, res) => {
   res.status(404).json({ msg: "Route not found" });

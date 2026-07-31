@@ -1,3 +1,5 @@
 node_modules
 .env
 redis.js
+src/config/swaggerDoc.js
+src/docs/

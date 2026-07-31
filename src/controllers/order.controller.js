@@ -84,17 +84,12 @@ const cancelOrder = async(req,res,next)=>{
 
     //authorization
     if(order.user_id !== req.user.id){
-      const err = new Error('Not allowed');
-      err.status=403;
-      throw err
-      
+      throw new AppError('Not allowed',403);     
     }
 
     //check status
     if(order.status !== 'pending'){
-      const err = new Error('Only pending orders can be cancelled');
-      err.status=400;
-      throw err;
+      throw new AppError('Only pending orders can be cancelled',400);
     }
 
     //get items
@@ -110,9 +105,7 @@ const cancelOrder = async(req,res,next)=>{
     for(const item of items){
       const product = products[item.product_id];
       if (!product) {
-      const err = new Error(`Product ${item.product_id} not found`);
-      err.status = 404;
-      throw err;
+      throw new AppError(`Product ${item.product_id} not found`,404);
     }
       const newQuantity = item.quantity + product.quantity;
       await Product.updateQuantity(product.id,newQuantity,client);
@@ -125,13 +118,13 @@ const cancelOrder = async(req,res,next)=>{
     return res.status(200).json({message: 'Order cancelled successfully'});
   } catch (err) {
     if (client) await client.query('ROLLBACK');
-    res.status(err.status||500).json({ msg: err.message||"Server error" });
+    next(err);
   }finally{
     if (client) client.release()
   }
 };
 
-const deleteOrder = async (req, res) => {
+const deleteOrder = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -148,8 +141,7 @@ const deleteOrder = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 };
 

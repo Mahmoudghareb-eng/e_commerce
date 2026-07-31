@@ -113,7 +113,7 @@ const refresh = async(req,res,next)=>{
      const RefreshToken = req.cookies?.refreshToken;
 
     if (!RefreshToken) {
-        throw new AppError("refresh token not found",401);
+        throw new AppError("refresh token not found",404);
     }  
     const payload = verifyRefreshToken(RefreshToken);
     const hashToken = hashRefreshToken(RefreshToken);
