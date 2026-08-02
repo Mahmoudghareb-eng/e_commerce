@@ -2,7 +2,8 @@ const db = require('../config/db');
 const Order = require("../model/order.model");
 const Product = require("../model/product.model");
 const Order_items = require("../model/orderItem.model");
-const AppError = require("../middleware/error.middleware");
+const { AppError } = require("../middleware/error.middleware");
+const logger = require("../config/logger");
 
 
 const getMyOrders = async (req, res, next) => {
@@ -28,11 +29,13 @@ const getOrderById = async (req, res, next) => {
     const order = await Order.getOrderById(id);
 
     if (!order) {
+      logger.warn(`Order ${id} not found`);
       throw new AppError("Order not found",404);
     }
 
     //authorization CHECK
     if (req.user.role !== "admin" && order.user_id !== req.user.id) {
+      logger.warn(`Unauthorized access to order ${id} by user ${req.user.id}`);
       throw new AppError("Not allowed",403);
     }
 
@@ -54,11 +57,12 @@ const updateOrderStatus = async (req, res, next) => {
     const order = await Order.getOrderById(id);
 
     if (!order) {
+      logger.warn(`Update failed: Order ${id} not found`);
       throw new AppError("Order not found",404);
     }
 
     const updatedOrder = await Order.updateOrderStatus(id, status);
-
+    logger.info(`Order ${id} status updated to ${status} by user ${req.user.id}`);
     return res.status(200).json({
       message: "Order updated successfully",
       order: updatedOrder
@@ -79,16 +83,19 @@ const cancelOrder = async(req,res,next)=>{
     //get order
     const order = await Order.getOrderById(orderId,client);
     if(!order){
+      logger.warn(`Cancel failed: Order ${orderId} not found`);
       throw new AppError('Order Not Found',404);
     } 
 
     //authorization
     if(order.user_id !== req.user.id){
+      logger.warn(`User ${req.user.id} tried to cancel order ${orderId} without permission`);
       throw new AppError('Not allowed',403);     
     }
 
     //check status
     if(order.status !== 'pending'){
+      logger.warn(`Cancel failed: Order ${orderId} status is ${order.status}`);
       throw new AppError('Only pending orders can be cancelled',400);
     }
 
@@ -115,9 +122,13 @@ const cancelOrder = async(req,res,next)=>{
     await Order.updateOrderStatus(orderId,'cancelled',client)
 
     await client.query('COMMIT');
+    logger.info(`Order ${orderId} cancelled successfully by user ${req.user.id}`);
     return res.status(200).json({message: 'Order cancelled successfully'});
   } catch (err) {
-    if (client) await client.query('ROLLBACK');
+    if (client){
+      await client.query('ROLLBACK');
+      logger.error(`Transaction rolled back while cancelling order ${req.params.id}`);
+    } 
     next(err);
   }finally{
     if (client) client.release()
@@ -131,11 +142,12 @@ const deleteOrder = async (req, res, next) => {
     const order = await Order.getOrderById(id);
 
     if (!order) {
-      return res.status(404).json({ msg: "Order not found" });
+      logger.warn(`Delete failed: Order ${id} not found`);
+      throw new AppError("Order not found",404);
     }
 
     await Order.deleteOrder(id);
-
+    logger.info(`Order ${id} deleted by user ${req.user.id}`);
     return res.status(200).json({
       message: "Order deleted successfully"
     });

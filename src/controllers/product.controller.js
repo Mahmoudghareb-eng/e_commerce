@@ -1,5 +1,6 @@
 const Product = require("../model/product.model");
-const AppError = require("../middleware/error.middleware");
+const { AppError } = require("../middleware/error.middleware");
+const logger = require("../config/logger");
 
 
 // CREATE PRODUCT
@@ -13,7 +14,7 @@ const createProduct = async (req, res, next) => {
       price,
       quantity
     );
-
+    logger.info(`Product created (ID: ${product.id}, Name: ${product.name})`);
     return res.status(201).json({
       message: "Product created successfully",
       product
@@ -58,6 +59,7 @@ const getProductById = async (req, res, next) => {
     const product = await Product.getProductById(id);
 
     if (!product) {
+      logger.warn(`Product not found (ID: ${id})`);
       throw new AppError("Product not found",404);
     }
 
@@ -79,6 +81,7 @@ const updateProduct = async (req, res, next) => {
     const isExist = await Product.getProductById(id);
 
     if (!isExist) {
+      logger.warn(`Update failed: Product ${id} not found`);
       throw new AppError("Product not found",404);
     }
 
@@ -87,7 +90,7 @@ const updateProduct = async (req, res, next) => {
       quantity,
       price
     );
-
+    logger.info(`Product updated (ID: ${id})`);
     return res.status(200).json({
       message: "Product updated successfully",
       product: updatedProduct
@@ -107,11 +110,12 @@ const deleteProduct = async (req, res, next) => {
     const isExist = await Product.getProductById(id);
 
     if (!isExist) {
+      logger.warn(`Delete failed: Product ${id} not found`);
       throw new AppError("Product not found",404);
     }
 
     await Product.deleteProduct(id);
-
+    logger.info(`Product deleted (ID: ${id}, Name: ${isExist.name})`);
     return res.status(200).json({
       message: "Product deleted successfully"
     });

@@ -1,5 +1,6 @@
 const User = require("../model/user.model");
-const AppError = require("../middleware/error.middleware");
+const { AppError } = require("../middleware/error.middleware");
+const logger = require("../config/logger");
 
 // GET ME
 const getMe = async (req, res, next) => {
@@ -9,6 +10,7 @@ const getMe = async (req, res, next) => {
     const user = await User.getUserById(id);
 
     if (!user) {
+      logger.warn(`Get profile failed: User ID ${id} not found`);
       throw new AppError("User not found",404);
     }
 
@@ -30,6 +32,7 @@ const updateProfile = async (req, res, next) => {
     const user = await User.getUserById(id);
 
     if (!user) {
+      logger.warn(`Update profile failed: User ID ${id} not found`);
       throw new AppError("User not found",404);
     }
 
@@ -38,7 +41,7 @@ const updateProfile = async (req, res, next) => {
       name || user.name,
       email || user.email
     );
-
+    logger.info(`Profile updated for user ID ${id}`);
     res.status(200).json({
       message: "User updated successfully",
       user: updatedUser
@@ -58,11 +61,12 @@ const deleteUser = async (req, res, next) => {
     const user = await User.getUserById(id);
 
     if (!user) {
+      logger.warn(`Delete failed: User ID ${id} not found`);
       throw new AppError("User not found",404);
     }
 
     await User.deleteUser(id);
-
+    logger.info(`User deleted (ID: ${id}, Email: ${user.email})`);
     res.status(200).json({
       message: "User deleted successfully"
     });

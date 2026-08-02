@@ -7,7 +7,8 @@ const refresh_token = require("../model/refreshToken.model");
 const bcrypt = require("bcrypt");
 const hashRefreshToken = require("../utility/hash.utility");
 const { refreshCookieOptions, clearRefreshCookieOptions } = require("../config/cookie");
-const AppError = require("../middleware/error.middleware");
+const { AppError } = require("../middleware/error.middleware");
+const logger = require("../config/logger");
 
 //rigster
 const register = async(req,res,next)=>{
@@ -19,6 +20,7 @@ const register = async(req,res,next)=>{
         // check email exists
         const existingUser = await User.getUserByEmail(emailLower);
         if (existingUser) {
+            logger.warn(`Register failed: Email already exists (${emailLower})`);
             throw new AppError("Email already exists",400);
         }
     
@@ -26,6 +28,7 @@ const register = async(req,res,next)=>{
         const hashPassword = await bcrypt.hash(password,10);
     
         const user = await User.createUser(name,emailLower,hashPassword);
+        logger.info(`New user registered: ${user.email} (ID: ${user.id})`);
         const accessToken = generateAccessToken({
             id:user.id,
             email:user.email
@@ -64,10 +67,12 @@ const login = async(req,res,next)=>{
     // check email exists
     const user = await User.getUserByEmail(emailLower);
     if (!user) {
+        logger.warn(`Login failed: User not found (${emailLower})`);
         throw new AppError("Invalid email or password",401);
     }
     const isMatch = await bcrypt.compare(password,user.password);
     if (!isMatch) {
+        logger.warn(`Login failed: Wrong password (${emailLower})`);
         throw new AppError("Invalid email or password",401);
     }
     const accessToken = generateAccessToken({
@@ -93,6 +98,7 @@ const login = async(req,res,next)=>{
     await refresh_token.createRefreshToken(user.id,hashToken);
     res.cookie("refreshToken",refreshToken,refreshCookieOptions);
 
+    logger.info(`User logged in: ${user.email} (ID: ${user.id})`);
     return res.status(200).json({
         message: "User logged in successfully",
         accessToken,
@@ -133,7 +139,7 @@ const refresh = async(req,res,next)=>{
         email: user.email,
         role: user.role
     });
-    
+    logger.info(`Access token refreshed for user ID: ${user.id}`);
     await refresh_token.revokeRefreshToken(hashToken);
 
     const newRefreshToken = generateRefreshToken({
@@ -176,6 +182,8 @@ const logout = async (req,res,next) => {
         await refresh_token.revokeRefreshToken(hashToken);
 
         res.clearCookie("refreshToken", clearRefreshCookieOptions);
+
+        logger.info(`User logged out (ID: ${req.user?.id || "Unknown"})`);
 
         return res.status(200).json({
             msg: "Logged out successfully"

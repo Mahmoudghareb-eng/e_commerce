@@ -1,8 +1,8 @@
 const Order_items = require('../model/orderItem.model');
 const Product = require('../model/product.model');
 const Order = require('../model/order.model');
-const AppError = require("../middleware/error.middleware");
-
+const { AppError } = require("../middleware/error.middleware");
+const logger = require('../config/logger');
 // CREATE ORDER ITEM
 const createOrderItems = async (req, res, next) => {
   try {
@@ -20,22 +20,27 @@ const createOrderItems = async (req, res, next) => {
     // CHECK ORDER EXISTS
     const order = await Order.getOrderById(order_id);
     if (!order) {
+      logger.warn(`Create order item failed: Order ${order_id} not found`);
       throw new AppError("Order not found",404);
     }
 
     // AUTHORIZATION CHECK
     if (order.user_id !== user_id) {
+      logger.warn(`User ${user_id} tried to add item to order ${order_id} without permission`);
       throw new AppError("Not allowed",403);
     }
 
     // CHECK PRODUCT EXISTS
     const product = await Product.getProductById(product_id);
     if (!product) {
+      logger.warn(`Create order item failed: Product ${product_id} not found`);
       throw new AppError("Product not found",404);
     }
 
     // OPTIONAL STOCK CHECK
     if (quantity > product.quantity) {
+      logger.warn(`Insufficient stock for product ${product_id}. 
+        Requested: ${quantity}, Available: ${product.quantity}`);
       throw new AppError("Insufficient stock",400);
     }
 
@@ -44,7 +49,8 @@ const createOrderItems = async (req, res, next) => {
 
     // CREATE ORDER ITEM
     const order_item = await Order_items.createOrderItem(order_id,product_id,quantity,price);
-
+    logger.info(`Order item created (Order: ${order_id}, 
+      Product: ${product_id}, Qty: ${quantity})`);
     return res.status(201).json({
       message: "Order item created successfully",
       order_item
@@ -63,11 +69,13 @@ const getItemsByOrderId = async (req, res, next) => {
     // CHECK ORDER EXISTS
     const order = await Order.getOrderById(order_id);
     if (!order) {
+      logger.warn(`Order ${order_id} not found`);
       throw new AppError("Order not found",404);
     }
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
+      logger.warn(`User ${user_id} attempted to access items of order ${order_id}`);
       throw new AppError("Not allowed",403);
     }
 
@@ -92,6 +100,7 @@ const getOrderItemById = async (req, res, next) => {
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
+      logger.warn(`Order item ${id} not found`);
       throw new AppError("Order item not found",404);      
     }
 
@@ -100,9 +109,10 @@ const getOrderItemById = async (req, res, next) => {
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
+      logger.warn(`User ${user_id} attempted to access order item ${id}`);
       throw new AppError("Not allowed",403);
     }
-
+    
     return res.status(200).json({
       message: "Order item fetched successfully",
       order_item
@@ -128,6 +138,7 @@ const updateOrderItem = async (req, res, next) => {
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
+      logger.warn(`Update failed: Order item ${id} not found`);
       throw new AppError("Order item not found",404);
     }
 
@@ -136,12 +147,13 @@ const updateOrderItem = async (req, res, next) => {
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
+      logger.warn(`User ${user_id} attempted to access order item ${id}`);
       throw new AppError("Not allowed",403);
     }
 
     // UPDATE ITEM
     const updatedItem =await Order_items.updateOrderItem(id,quantity);
-
+    logger.info(`Order item ${id} updated. New quantity: ${quantity}`);
     return res.status(200).json({
       message: "Order item updated successfully",
       order_item: updatedItem
@@ -161,6 +173,7 @@ const deleteOrderItem = async (req, res, next) => {
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
     if (!order_item) {
+      logger.warn(`Delete failed: Order item ${id} not found`);
       throw new AppError("Order item not found",404);
     }
 
@@ -169,15 +182,13 @@ const deleteOrderItem = async (req, res, next) => {
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
-      return res.status(403).json({
-        msg: "Not allowed"
-      });
+      logger.warn(`User ${user_id} attempted to access order item ${id}`);
       throw new AppError("Not allowed",403);
     }
 
     // DELETE ITEM
     const deletedItem = await Order_items.deleteOrderItem(id);
-
+    logger.info(`Order item ${id} deleted`);
     return res.status(200).json({
       message: "Order item deleted successfully",
       order_item: deletedItem
