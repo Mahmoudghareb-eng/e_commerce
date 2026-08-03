@@ -107,15 +107,15 @@ const deleteProduct = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const isExist = await Product.getProductById(id);
+    const deletedProduct = await Product.deleteProduct(id);
 
-    if (!isExist) {
+    if (!deletedProduct) {
       logger.warn(`Delete failed: Product ${id} not found`);
       throw new AppError("Product not found",404);
     }
 
     await Product.deleteProduct(id);
-    logger.info(`Product deleted (ID: ${id}, Name: ${isExist.name})`);
+    logger.info(`Product deleted (ID: ${id}, Name: ${deletedProduct.name})`);
     return res.status(200).json({
       message: "Product deleted successfully"
     });

@@ -1,4 +1,5 @@
 const {verifyToken} = require("../config/jwt");
+const User = require("../model/user.model");
 
 const auth = (req,res,next)=>{
   const header = req.headers.authorization;
@@ -14,7 +15,11 @@ const auth = (req,res,next)=>{
     return res.status(401).json({ message: "Token missing" });
   }
   try{
-    req.user=verifyToken(token);
+    const decoded = verifyToken(token);
+    const user = await User.getUserById(decoded.id);
+    if(!user){
+      return res.status(404).json({message: "User not found"});
+    }
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });

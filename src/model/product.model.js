@@ -21,7 +21,7 @@ const addProduct = async (name, description, price, quantity) => {
 // GET PRODUCTS (pagination)
 const getProducts = async(search,minprice,maxprice,sort,limit,offset)=>{
   try{
-  let query = `SELECT * FROM products WHERE 1=1`;
+  let query = `SELECT * FROM products WHERE 1=1 AND deleted_at IS NULL`;
   let values = [];
   if (search) {
     values.push(`%${search}%`);
@@ -54,7 +54,7 @@ const getProducts = async(search,minprice,maxprice,sort,limit,offset)=>{
 const getProductById = async (id,client=db) => {
   try {
     const result = await client.query(
-      `SELECT * FROM products WHERE id = $1`,
+      `SELECT * FROM products WHERE id = $1 AND deleted_at IS NULL`,
       [id]
     );
 
@@ -69,7 +69,7 @@ const getProductById = async (id,client=db) => {
 const getProductsByIds = async (ids,client=db) => {
   try {
     const result = await client.query(
-      `SELECT * FROM products WHERE id = ANY($1)
+      `SELECT * FROM products WHERE id = ANY($1) AND deleted_at IS NULL
       FOR UPDATE`,
       [ids]
     );
@@ -87,9 +87,10 @@ const updateProduct = async (id, quantity, price) => {
     const result = await db.query(
       `UPDATE products
        SET quantity = $1,
-           price = $2,
-           updated_at = CURRENT_TIMESTAMP
+       price = $2,
+       updated_at = CURRENT_TIMESTAMP
        WHERE id = $3
+       AND deleted_at IS NULL
        RETURNING *`,
       [quantity, price, id]
     );
@@ -108,7 +109,7 @@ const updateQuantity = async(id,quantity,client=db)=>{
       `UPDATE products
       SET quantity=$2,
       updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1 
+      WHERE id = $1 AND deleted_at IS NULL
       RETURNING *`,
       [id,quantity]
     );
@@ -122,8 +123,11 @@ const updateQuantity = async(id,quantity,client=db)=>{
 const deleteProduct = async (id) => {
   try {
     const result = await db.query(
-      `DELETE FROM products
+      `UPDATE products
+       SET deleted_at = NOW(),
+       updated_at = CURRENT_TIMESTAMP
        WHERE id = $1
+       AND deleted_at IS NULL
        RETURNING *`,
       [id]
     );

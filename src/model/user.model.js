@@ -23,6 +23,7 @@ const getUsers = async (limit = 10, offset = 0) => {
     const result = await db.query(
       `SELECT id, name, email, role, created_at
        FROM users
+       WHERE deleted_at IS NULL
        ORDER BY created_at DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]
@@ -41,7 +42,7 @@ const getUserById = async (id) => {
     const result = await db.query(
       `SELECT id, name, email, role, created_at
        FROM users
-       WHERE id = $1`,
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id]
     );
 
@@ -58,7 +59,7 @@ const getUserByEmail = async (email) => {
     const result = await db.query(
       `SELECT *
        FROM users
-       WHERE email = $1`,
+       WHERE email = $1 AND deleted_at IS NULL`,
       [email]
     );
 
@@ -77,6 +78,7 @@ const updateUser = async (id, name, email) => {
        SET name = $1,
            email = $2
        WHERE id = $3
+       AND deleted_at IS NULL
        RETURNING id, name, email, role, created_at`,
       [name, email, id]
     );
@@ -92,9 +94,11 @@ const updateUser = async (id, name, email) => {
 const deleteUser = async (id) => {
   try {
     const result = await db.query(
-      `DELETE FROM users
-       WHERE id = $1
-       RETURNING id, name, email`,
+      `UPDATE users
+      SET deleted_at = NOW()
+      WHERE id = $1
+      AND deleted_at IS NULL
+      RETURNING *`,
       [id]
     );
 

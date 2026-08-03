@@ -58,15 +58,14 @@ const deleteUser = async (req, res, next) => {
   try {
     const id = req.user.id;
 
-    const user = await User.getUserById(id);
+    const deletedUser = await User.deleteUser(id);
 
-    if (!user) {
+    if (!deletedUser) {
       logger.warn(`Delete failed: User ID ${id} not found`);
       throw new AppError("User not found",404);
     }
 
-    await User.deleteUser(id);
-    logger.info(`User deleted (ID: ${id}, Email: ${user.email})`);
+    logger.info(`User deleted (ID: ${id}, Email: ${deletedUser.email})`);
     res.status(200).json({
       message: "User deleted successfully"
     });
