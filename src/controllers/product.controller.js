@@ -1,7 +1,8 @@
 const Product = require("../model/product.model");
 const { AppError } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
-
+const redis = require("../config/redis");
+const clearCacheByPattern = require("../utility/redis.util");
 
 // CREATE PRODUCT
 const createProduct = async (req, res, next) => {
@@ -15,6 +16,7 @@ const createProduct = async (req, res, next) => {
       quantity
     );
     logger.info(`Product created (ID: ${product.id}, Name: ${product.name})`);
+    await clearCacheByPattern("products:*");
     return res.status(201).json({
       message: "Product created successfully",
       product
@@ -34,6 +36,11 @@ const getProducts = async (req, res, next) => {
     const offset = (page-1)*limit;
     const minPrice = req.query.minPrice? Number(req.query.minPrice) : null;
     const maxPrice = req.query.maxPrice? Number(req.query.maxPrice) : null;
+    const cacheKey = `products:${page}:${limit}:${req.query.search || ""}:${minPrice ?? ""}:${maxPrice ?? ""}:${req.query.sort || ""}`;
+    const cache = await redis.get(cacheKey);
+    if (cache) {
+    return res.status(200).json(JSON.parse(cache));
+    }
     const products = await Product.getProducts(
     req.query.search,
     minPrice,
@@ -42,9 +49,8 @@ const getProducts = async (req, res, next) => {
     limit,
     offset
   );
-
-    return res.status(200).json(products);
-
+  await redis.setEx(cacheKey,60,JSON.stringify(products));
+  return res.status(200).json(products);
   } catch (err) {
     next(err);
   }
@@ -55,14 +61,17 @@ const getProducts = async (req, res, next) => {
 const getProductById = async (req, res, next) => {
   try {
     const id = req.params.id;
-
+    const cacheKey = `product:${id}`;
+    const cache = await redis.get(cacheKey);
+    if (cache) {
+    return res.status(200).json(JSON.parse(cache));
+    }
     const product = await Product.getProductById(id);
-
     if (!product) {
       logger.warn(`Product not found (ID: ${id})`);
       throw new AppError("Product not found",404);
     }
-
+    await redis.setEx(cacheKey, 60, JSON.stringify(product));
     return res.status(200).json(product);
 
   } catch (err) {
@@ -91,6 +100,8 @@ const updateProduct = async (req, res, next) => {
       price
     );
     logger.info(`Product updated (ID: ${id})`);
+    await redis.del(`product:${id}`);
+    await clearCacheByPattern("products:*");
     return res.status(200).json({
       message: "Product updated successfully",
       product: updatedProduct
@@ -114,8 +125,9 @@ const deleteProduct = async (req, res, next) => {
       throw new AppError("Product not found",404);
     }
 
-    await Product.deleteProduct(id);
     logger.info(`Product deleted (ID: ${id}, Name: ${deletedProduct.name})`);
+    await redis.del(`product:${id}`);
+    await clearCacheByPattern("products:*");
     return res.status(200).json({
       message: "Product deleted successfully"
     });

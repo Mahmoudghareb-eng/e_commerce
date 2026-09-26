@@ -10,7 +10,7 @@ class AppError extends Error {
 
 const errorHandler = (err,req,res,next)=>{
     logger.error(err);
-    return res.status(err.status || 500).json({
+    return res.status(err.statusCode || 500).json({
         msg: err.message || "Server error"
     });
 };

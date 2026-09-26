@@ -1,7 +1,7 @@
 const {verifyToken} = require("../config/jwt");
 const User = require("../model/user.model");
 
-const auth = (req,res,next)=>{
+const auth = async(req,res,next)=>{
   const header = req.headers.authorization;
 
   if(!header){
@@ -20,6 +20,7 @@ const auth = (req,res,next)=>{
     if(!user){
       return res.status(404).json({message: "User not found"});
     }
+    req.user = user;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });

@@ -21,15 +21,15 @@ const router = express.Router();
 router.get('/myorders', auth, getMyOrders);
 
 // GET ORDER BY ID
-router.get('/:id', auth, idValidation, validate, getOrderById);
+router.get('/:id', auth, idValidation(), validate, getOrderById);
 
 // UPDATE ORDER STATUS
-router.put('/:id', auth, isAdmin, idValidation, orderValidation, validate, updateOrderStatus);
+router.put('/:id', auth, isAdmin, idValidation(), orderValidation, validate, updateOrderStatus);
 
 //CANCEL ORDER
-router.patch('/:id/cancel', auth, idValidation, validate, cancelOrder);
+router.patch('/:id/cancel', auth, idValidation(), validate, cancelOrder);
 
 // DELETE ORDER
-router.delete('/:id', auth, isAdmin, idValidation, validate, deleteOrder);
+router.delete('/:id', auth, isAdmin, idValidation(), validate, deleteOrder);
 
 module.exports = router;

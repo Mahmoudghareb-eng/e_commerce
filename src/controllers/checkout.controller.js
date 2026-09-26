@@ -10,6 +10,7 @@ const logger = require('../config/logger');
 
 const checkout = async(req,res,next)=>{
     let client;
+    let committed = false;
     try{
         client = await db.connect()   
         await client.query('BEGIN');
@@ -75,6 +76,7 @@ const checkout = async(req,res,next)=>{
         }
         await Cart.clearCart(cart.id,client);
         await client.query('COMMIT');
+        committed=true;
         logger.info(`Checkout completed successfully (Order: ${order.id}, User: ${req.user.id})`);
         return res.status(201).json({
     message: "Checkout successful",
@@ -82,7 +84,7 @@ const checkout = async(req,res,next)=>{
     order_items
 });
     } catch (err) {
-    if (client){
+    if (client&&!committed){
     logger.error(`Checkout transaction rolled back for user ${req.user?.id}: ${err.message}`);
     await client.query('ROLLBACK');
     } 

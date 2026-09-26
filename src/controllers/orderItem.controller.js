@@ -64,7 +64,7 @@ const createOrderItems = async (req, res, next) => {
 const getItemsByOrderId = async (req, res, next) => {
   try {
     const user_id = req.user.id;
-    const order_id = req.params.order_id;
+    const order_id = Number(req.params.order_id);
 
     // CHECK ORDER EXISTS
     const order = await Order.getOrderById(order_id);
@@ -95,7 +95,7 @@ const getItemsByOrderId = async (req, res, next) => {
 const getOrderItemById = async (req, res, next) => {
   try {
     const user_id = req.user.id;
-    const id = req.params.id;
+    const id = Number(req.params.id);
 
     // CHECK ITEM EXISTS
     const order_item = await Order_items.getOrderItemById(id);
@@ -106,6 +106,11 @@ const getOrderItemById = async (req, res, next) => {
 
     // GET ORDER
     const order = await Order.getOrderById(order_item.order_id);
+
+    if (!order) {
+    logger.warn(`Order ${order_item.order_id} not found`);
+    throw new AppError("Order not found", 404);
+    }
 
     // AUTHORIZATION
     if (order.user_id !== user_id) {
@@ -145,6 +150,11 @@ const updateOrderItem = async (req, res, next) => {
     // GET ORDER
     const order = await Order.getOrderById(order_item.order_id);
 
+    if (!order) {
+    logger.warn(`Order ${order_item.order_id} not found`);
+    throw new AppError("Order not found", 404);
+    }
+
     // AUTHORIZATION
     if (order.user_id !== user_id) {
       logger.warn(`User ${user_id} attempted to access order item ${id}`);
@@ -179,7 +189,11 @@ const deleteOrderItem = async (req, res, next) => {
 
     // GET ORDER
     const order = await Order.getOrderById(order_item.order_id);
-
+    if (!order) {
+    logger.warn(`Order ${order_item.order_id} not found`);
+    throw new AppError("Order not found", 404);
+    }
+    
     // AUTHORIZATION
     if (order.user_id !== user_id) {
       logger.warn(`User ${user_id} attempted to access order item ${id}`);

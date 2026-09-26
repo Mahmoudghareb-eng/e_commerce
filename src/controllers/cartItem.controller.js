@@ -98,6 +98,11 @@ const updateCartItemQuantity = async (req, res, next) => {
     const { id } = req.params;
     const { quantity } = req.body;
 
+    // VALIDATION
+    if (!quantity || quantity <= 0) {
+      throw new AppError("Quantity must be greater than 0", 400);
+    }
+    
     const cart = req.cart;
 
     // get item first

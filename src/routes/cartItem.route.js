@@ -23,9 +23,9 @@ router.post('/', auth, checkCart, itemValidator, validate, addItemToCart);
 router.get('/', auth, checkCart, getCartItems);
 
 // UPDATE ITEM
-router.put('/:id', auth, checkCart, idValidation, quantityValidator, validate, updateCartItemQuantity);
+router.put('/:id', auth, checkCart, idValidation(), quantityValidator, validate, updateCartItemQuantity);
 
 // DELETE ITEM
-router.delete('/:id', auth, checkCart, idValidation, validate, removeCartItem);
+router.delete('/:id', auth, checkCart, idValidation(), validate, removeCartItem);
 
 module.exports = router;

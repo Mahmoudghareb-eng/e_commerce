@@ -43,14 +43,14 @@ app.use(
     })
 );
 
-app.use('/api/users',userRoute);
-app.use('/api/products',productRoute);
-app.use('/api/orders',orderRoute);
-app.use('/api/orders/items',orderItemRoute);
-app.use('/api/cart/items',cartItemRoute);
-app.use('/api/cart',cartRoute);
-app.use('/api/coupons',couponRoute);
-app.use('/api/checkout',checkout);
+app.use('/api/v1/users',userRoute);
+app.use('/api/v1/products',productRoute);
+app.use('/api/v1/orders',orderRoute);
+app.use('/api/v1/orders/items',orderItemRoute);
+app.use('/api/v1/cart/items',cartItemRoute);
+app.use('/api/v1/cart',cartRoute);
+app.use('/api/v1/coupons',couponRoute);
+app.use('/api/v1/checkout',checkout);
 
 const swaggerDoc = require('./config/swaggerDoc');
 swaggerDoc(app);
@@ -61,6 +61,4 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-const port = process.env.PORT || 3000;
-
-app.listen(port,()=>console.log(`server is running on ${port}`));
+module.exports = app;

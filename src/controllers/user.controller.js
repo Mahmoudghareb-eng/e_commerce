@@ -1,11 +1,19 @@
 const User = require("../model/user.model");
 const { AppError } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
+const redis = require("../config/redis");
+const clearCacheByPattern = require("../utility/redis.util");
 
 // GET ME
 const getMe = async (req, res, next) => {
   try {
     const id = req.user.id;
+
+    const cacheKey = `user:${id}`;
+    const cache = await redis.get(cacheKey);
+    if (cache) {
+    return res.status(200).json(JSON.parse(cache));
+    }
 
     const user = await User.getUserById(id);
 
@@ -14,6 +22,7 @@ const getMe = async (req, res, next) => {
       throw new AppError("User not found",404);
     }
 
+    await redis.setEx(cacheKey,60,JSON.stringify({ user }));
     res.status(200).json({ user });
 
   } catch (err) {
@@ -21,6 +30,24 @@ const getMe = async (req, res, next) => {
   }
 };
 
+//GET ALL USERS 
+const getUsers = async (req, res, next) =>{
+  try{
+    const page = parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit)||10;
+    const offset = (page-1)*limit;
+    const cacheKey = `users:${page}:${limit}`;
+    const cache = await redis.get(cacheKey);
+    if (cache) {
+    return res.status(200).json(JSON.parse(cache));
+    }
+    const users = await User.getUsers(limit,offset);
+    await redis.setEx(cacheKey,60,JSON.stringify({ users }));
+    return res.status(200).json({users});
+  } catch (err) {
+    next(err);
+  }
+};
 
 // UPDATE PROFILE
 const updateProfile = async (req, res, next) => {
@@ -42,6 +69,8 @@ const updateProfile = async (req, res, next) => {
       email || user.email
     );
     logger.info(`Profile updated for user ID ${id}`);
+    await redis.del(`user:${id}`);
+    await clearCacheByPattern("users:*");
     res.status(200).json({
       message: "User updated successfully",
       user: updatedUser
@@ -66,6 +95,8 @@ const deleteUser = async (req, res, next) => {
     }
 
     logger.info(`User deleted (ID: ${id}, Email: ${deletedUser.email})`);
+    await redis.del(`user:${id}`);
+    await clearCacheByPattern("users:*");
     res.status(200).json({
       message: "User deleted successfully"
     });
@@ -77,6 +108,7 @@ const deleteUser = async (req, res, next) => {
 
 module.exports = {
   getMe,
+  getUsers,
   updateProfile,
   deleteUser
 };

@@ -4,14 +4,24 @@ const Product = require("../model/product.model");
 const Order_items = require("../model/orderItem.model");
 const { AppError } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
-
+const redis = require("../config/redis");
+const clearCacheByPattern = require("../utility/redis.util");
 
 const getMyOrders = async (req, res, next) => {
   try {
     const user_id = req.user.id;
 
-    const orders = await Order.getOrdersByUser(user_id);
+    const cacheKey = `orders:${user_id}`;
+    const cache = await redis.get(cacheKey);
+    if (cache) {
+      return res.status(200).json({
+        message: "Orders fetched successfully",
+        orders: JSON.parse(cache)
+      });
+    }
 
+    const orders = await Order.getOrdersByUser(user_id);
+    await redis.setEx(cacheKey,60,JSON.stringify(orders));
     return res.status(200).json({
       message: "Orders fetched successfully",
       orders
@@ -26,11 +36,19 @@ const getOrderById = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const order = await Order.getOrderById(id);
+    const cacheKey = `order:${id}`;
+    const cache = await redis.get(cacheKey);
+    let order;
+    if(cache){
+      order = JSON.parse(cache);
+    }else{
+       order = await Order.getOrderById(id);
 
-    if (!order) {
+      if (!order) {
       logger.warn(`Order ${id} not found`);
       throw new AppError("Order not found",404);
+    }
+    await redis.setEx(cacheKey, 60, JSON.stringify(order));
     }
 
     //authorization CHECK
@@ -38,7 +56,6 @@ const getOrderById = async (req, res, next) => {
       logger.warn(`Unauthorized access to order ${id} by user ${req.user.id}`);
       throw new AppError("Not allowed",403);
     }
-
     return res.status(200).json({
       message: "Order fetched successfully",
       order
@@ -63,6 +80,8 @@ const updateOrderStatus = async (req, res, next) => {
 
     const updatedOrder = await Order.updateOrderStatus(id, status);
     logger.info(`Order ${id} status updated to ${status} by user ${req.user.id}`);
+    await redis.del(`order:${id}`);
+    await clearCacheByPattern("orders:*");
     return res.status(200).json({
       message: "Order updated successfully",
       order: updatedOrder
@@ -75,6 +94,8 @@ const updateOrderStatus = async (req, res, next) => {
 
 const cancelOrder = async(req,res,next)=>{
   let client;
+  let committed = false;
+
   try{
     client = await db.connect();
     await client.query('BEGIN');
@@ -119,13 +140,16 @@ const cancelOrder = async(req,res,next)=>{
     }
 
     //update status
-    await Order.updateOrderStatus(orderId,'cancelled',client)
+    await Order.updateOrderStatus(orderId,'cancelled',client);
 
     await client.query('COMMIT');
+    committed=true;
+    await redis.del(`order:${orderId}`);
+    await clearCacheByPattern("orders:*");
     logger.info(`Order ${orderId} cancelled successfully by user ${req.user.id}`);
     return res.status(200).json({message: 'Order cancelled successfully'});
   } catch (err) {
-    if (client){
+    if (client&&!committed){
       await client.query('ROLLBACK');
       logger.error(`Transaction rolled back while cancelling order ${req.params.id}`);
     } 
@@ -148,6 +172,8 @@ const deleteOrder = async (req, res, next) => {
 
     await Order.deleteOrder(id);
     logger.info(`Order ${id} deleted by user ${req.user.id}`);
+    await redis.del(`order:${id}`);
+    await clearCacheByPattern("orders:*");
     return res.status(200).json({
       message: "Order deleted successfully"
     });
