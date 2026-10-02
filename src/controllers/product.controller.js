@@ -7,13 +7,14 @@ const clearCacheByPattern = require("../utility/redis.util");
 // CREATE PRODUCT
 const createProduct = async (req, res, next) => {
   try {
-    const { name, description, price, quantity } = req.body;
+    const { name, description, price, quantity, image_url } = req.body;
 
     const product = await Product.addProduct(
       name.trim(),
       description.trim(),
       price,
-      quantity
+      quantity,
+      image_url
     );
     logger.info(`Product created (ID: ${product.id}, Name: ${product.name})`);
     await clearCacheByPattern("products:*");

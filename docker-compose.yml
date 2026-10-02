@@ -17,7 +17,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: Mahmood*1234*
       POSTGRES_DB: e_commerce
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -29,6 +29,15 @@ services:
     container_name: ecommerce_redis
     ports:
       - "6379:6379"
-
+      
+  nginx:
+    image: nginx:alpine
+    container_name: ecommerce_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 volumes:
   postgres_data:

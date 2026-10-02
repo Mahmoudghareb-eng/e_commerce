@@ -1,4 +1,4 @@
 node_modules
 .env
-redis.js
 logs
+e_commerce.backup

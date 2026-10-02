@@ -1,13 +1,13 @@
 const db = require('../config/db');
 
 // ADD PRODUCT
-const addProduct = async (name, description, price, quantity) => {
+const addProduct = async (name, description, price, quantity, image_url) => {
   try {
     const result = await db.query(
-      `INSERT INTO products (name, description, price, quantity)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO products (name, description, price, quantity, image_url)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [name, description, price, quantity]
+      [name, description, price, quantity, image_url]
     );
 
     return result.rows[0];
