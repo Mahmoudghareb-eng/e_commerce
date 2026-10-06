@@ -44,6 +44,35 @@ components:
           type: string
           example: Password123
 
+    ForgetPassword:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: mahmoud@example.com
+
+    ResetPassword:
+      type: object
+      required:
+        - email
+        - code
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: mahmoud@example.com
+        code:
+          type: number
+          format: integer
+          example: 123456
+        password:
+          type: string
+          example: Password123          
+
     UpdateMe:
       type: object
       properties:
@@ -310,6 +339,52 @@ paths:
           description: Refresh token not found
         "429":
           description: Too many requests
+        "500":
+          description: Server error
+  
+  /api/v1/users/forgotpassword:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send a password reset code to the user's email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgetPassword'
+      responses:
+        '200':
+          description: Password reset code sent successfully
+        '401':
+          description: Invalid email
+        '404':
+          description: User not found
+        "500":
+          description: Server error
+
+  /api/v1/users/resetpassword:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password
+      description: Reset user password using the reset code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPassword'
+      responses:
+        '200':
+          description: Password reset successfully
+        '401':
+          description: Invalid code or email or code expired
+        '400':
+          description: Invalid or expired reset code
+        '429':
+          description: Too many attempts. Please request a new code
         "500":
           description: Server error
 

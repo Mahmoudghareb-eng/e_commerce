@@ -6,9 +6,11 @@ const User = require("../model/user.model");
 const refresh_token = require("../model/refreshToken.model");
 const bcrypt = require("bcrypt");
 const hashRefreshToken = require("../utility/hash.utility");
+const sendCode = require("../utility/sandCode.utility")
 const { refreshCookieOptions, clearRefreshCookieOptions } = require("../config/cookie");
 const { AppError } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
+const { use } = require("../config/email");
 
 //rigster
 const register = async(req,res,next)=>{
@@ -168,6 +170,90 @@ const refresh = async(req,res,next)=>{
     }
 };
 
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const emailLower = email.toLowerCase();
+
+    // Check if user exists
+    const user = await User.getUserByEmail(emailLower);
+
+    if (!user) {
+      logger.warn(`Forgot Password failed: User not found (${emailLower})`);
+      throw new AppError("Invalid email", 401);
+    }
+
+    // Generate 6-digit code
+    const code = crypto.randomInt(100000, 1000000).toString();
+
+    // Code expires after 10 minutes
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Save code in database
+    await User.setResetCode(user.id, code, expiresAt);
+
+    // Send code to user's email
+    await sendCode(emailLower, code);
+
+    return res.status(200).json({msg: "Verification code sent successfully",code});
+  } catch (err) {
+    next(err);
+  }
+};
+
+//reset password
+const resetPassword = async (req, res, next) => {
+  try {
+    const { email, code, password } = req.body;
+
+    const emailLower = email.toLowerCase();
+
+    // Find user
+    const user = await User.getUserByEmail(emailLower);
+
+    if (!user) {
+      throw new AppError("Invalid email", 401);
+    }
+
+    // Check maximum attempts
+    if (user.reset_attempts >= 5) {
+      logger.warn(`Reset Password failed: Too many attempts (${emailLower})`);
+      throw new AppError("Too many attempts. Please request a new code",429);
+    }
+
+    // Check code expiration
+    if (
+      !user.reset_code_expires_at ||
+      new Date() > new Date(user.reset_code_expires_at)
+    ) {
+      throw new AppError("Verification code expired", 401);
+    }
+
+    // Check code
+    if (String(code) !== String(user.reset_code)) {
+      const result = await User.incrementResetAttempts(user.id);
+
+      logger.warn(`Reset Password failed: Invalid code (${emailLower})`);
+
+      if (result.reset_attempts >= 5) {
+        throw new AppError("Too many attempts. Please request a new code",429);
+      }
+      throw new AppError("Invalid code", 401);
+    }
+    
+    // Hash new password
+    const hashNewPassword = await bcrypt.hash(password,10);
+
+    // Update password
+    await User.updatePassword(user.id, hashNewPassword);
+    return res.status(200).json({msg: "Reset password successfully"});
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 //logout
 const logout = async (req,res,next) => {
     try {
@@ -198,5 +284,7 @@ module.exports={
     register,
     login,
     refresh,
+    forgotPassword,
+    resetPassword,
     logout
 };

@@ -1,12 +1,21 @@
 const express = require("express");
 
-const { register, login, refresh, logout } = require("../controllers/auth.controller");
-const { getMe, updateProfile, deleteUser, getUsers } = require("../controllers/user.controller");
-
+const { 
+     register,
+     login,
+     refresh,
+     forgotPassword,
+     resetPassword,
+     logout } = require("../controllers/auth.controller");
+const {
+     getMe,
+     updateProfile,
+     deleteUser,
+     getUsers} = require("../controllers/user.controller");
 const auth = require("../middleware/auth.middleware");
 const isAdmin = require("../middleware/isAdmin");
 const {authLimiter, refreshLimiter} = require("../middleware/rateLimit.middleware");
-const {loginValidation, registerValidation} = require("../validators/auth.validators");
+const {loginValidation, registerValidation, resetPasswordValidation} = require("../validators/auth.validators");
 const validate = require("../middleware/validator.middleware")
 
 const router = express.Router();
@@ -15,6 +24,8 @@ const router = express.Router();
 router.post('/register', authLimiter, registerValidation, validate, register);
 router.post('/login', authLimiter, loginValidation, validate, login);
 router.post('/refresh', refreshLimiter, refresh);
+router.post('/forgotpassword', forgotPassword);
+router.post('/resetpassword', resetPasswordValidation, validate, resetPassword);
 router.post('/logout', refreshLimiter, logout);
 
 // user profile (protected)

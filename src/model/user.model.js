@@ -90,6 +90,47 @@ const updateUser = async (id, name, email) => {
   }
 };
 
+const setResetCode = async (userId, code, expiresAt) => {
+  const result = await db.query(
+    `UPDATE users
+     SET reset_code = $1,
+         reset_code_expires_at = $2,
+         reset_attempts = 0
+     WHERE id = $3
+     RETURNING id, email`,
+    [code, expiresAt, userId]
+  );
+
+  return result.rows[0];
+};
+
+const incrementResetAttempts = async (userId) => {
+  const result = await db.query(
+    `UPDATE users
+     SET reset_attempts = reset_attempts + 1
+     WHERE id = $1
+     RETURNING reset_attempts`,
+    [userId]
+  );
+
+  return result.rows[0];
+};
+
+const updatePassword = async (userId, password) => {
+  const result = await db.query(
+    `UPDATE users
+     SET password = $1,
+         reset_code = NULL,
+         reset_code_expires_at = NULL,
+         reset_attempts = 0
+     WHERE id = $2
+     RETURNING id, email`,
+    [password, userId]
+  );
+
+  return result.rows[0];
+};
+
 // delete user
 const deleteUser = async (id) => {
   try {
@@ -115,5 +156,8 @@ module.exports = {
   getUserById,
   getUserByEmail,
   updateUser,
-  deleteUser,
+  setResetCode,
+  updatePassword,
+  incrementResetAttempts,
+  deleteUser
 };
