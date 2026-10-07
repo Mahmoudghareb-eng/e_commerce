@@ -10,10 +10,10 @@ const generateAccessToken  = (user)=>{
 };
 
 //verify
-const verifyToken = (token)=>{
-    try{
-        return jwt.verify(token,process.env.JWT_SECRET);
-    }catch(err){
+const verifyToken = (token) => {
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
         throw new Error("Invalid or expired token");
     }
 };

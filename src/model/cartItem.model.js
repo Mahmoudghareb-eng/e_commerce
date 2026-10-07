@@ -15,7 +15,7 @@ const addItemToCart = async (cart_id,product_id,quantity) => {
 
   } catch (err) {
     throw new Error(
-      'Error adding item to cart: ' + err.message
+      'Error adding item to cart: ' + err.message, { cause: err }
     );
   }
 };
@@ -41,7 +41,7 @@ const getCartItems = async (cart_id,client=db) => {
 
   } catch (err) {
     throw new Error(
-      'Error fetching cart items: ' + err.message
+      'Error fetching cart items: ' + err.message, { cause: err }
     );
   }
 };
@@ -56,7 +56,7 @@ const getCartItemById = async(id)=>{
     return item.rows[0];
   } catch (err) {
     throw new Error(
-      'Error fetching cart items: ' + err.message
+      'Error fetching cart items: ' + err.message, { cause: err }
     );
   }
 };
@@ -73,7 +73,7 @@ const getCartItemByProduct = async (cart_id,product_id) => {
 
   } catch (err) {
     throw new Error(
-      'Error fetching cart item: ' + err.message
+      'Error fetching cart item: ' + err.message, { cause: err }
     );
   }
 };
@@ -90,7 +90,7 @@ const updateCartItemQuantity = async (id,quantity) => {
 
   } catch (err) {
     throw new Error(
-      'Error updating cart item: ' + err.message
+      'Error updating cart item: ' + err.message, { cause: err }
     );
   }
 };
@@ -108,7 +108,7 @@ const removeCartItem = async (id) => {
 
   } catch (err) {
     throw new Error(
-      'Error deleting cart item: ' + err.message
+      'Error deleting cart item: ' + err.message, { cause: err }
     );
   }
 };

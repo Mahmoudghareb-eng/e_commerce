@@ -10,7 +10,7 @@ const createCart = async (user_id) => {
 
     return cart.rows[0];
   } catch (err) {
-    throw new Error('Error creating cart: ' + err.message);
+    throw new Error('Error creating cart: ' + err.message, { cause: err });
   }
 };
 
@@ -25,7 +25,7 @@ const getCartbyUser = async (user_id) => {
 
     return cart.rows[0];
   } catch (err) {
-    throw new Error('Error fetching cart: ' + err.message);
+    throw new Error('Error fetching cart: ' + err.message, { cause: err });
   }
 };
 
@@ -40,7 +40,7 @@ const clearCart = async (cartId,client=db) => {
 
     return result.rowCount;
   } catch (err) {
-    throw new Error("Error clearing cart: " + err.message);
+    throw new Error("Error clearing cart: " + err.message, { cause: err });
   }
 };
 
@@ -55,7 +55,7 @@ const deleteCart = async (user_id) => {
 
     return cart.rows[0];
   } catch (err) {
-    throw new Error("Error deleting cart: " + err.message);
+    throw new Error("Error deleting cart: " + err.message, { cause: err });
   }
 };
 

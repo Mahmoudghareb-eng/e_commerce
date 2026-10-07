@@ -13,7 +13,7 @@ const createUser = async (name, email, hashedPassword, role = 'user') => {
     return result.rows[0];
 
   } catch (err) {
-    throw new Error('Error creating user: ' + err.message);
+    throw new Error('Error creating user: ' + err.message, { cause: err }, { cause: err });
   }
 };
 
@@ -32,7 +32,7 @@ const getUsers = async (limit = 10, offset = 0) => {
     return result.rows;
 
   } catch (err) {
-    throw new Error('Error fetching users: ' + err.message);
+    throw new Error('Error fetching users: ' + err.message, { cause: err });
   }
 };
 
@@ -49,7 +49,7 @@ const getUserById = async (id) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error fetching user: ' + err.message);
+    throw new Error('Error fetching user: ' + err.message, { cause: err });
   }
 };
 
@@ -66,7 +66,7 @@ const getUserByEmail = async (email) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error fetching user by email: ' + err.message);
+    throw new Error('Error fetching user by email: ' + err.message, { cause: err });
   }
 };
 
@@ -86,7 +86,7 @@ const updateUser = async (id, name, email) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error updating user: ' + err.message);
+    throw new Error('Error updating user: ' + err.message, { cause: err });
   }
 };
 
@@ -146,7 +146,7 @@ const deleteUser = async (id) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error deleting user: ' + err.message);
+    throw new Error('Error deleting user: ' + err.message, { cause: err });
   }
 };
 

@@ -79,10 +79,10 @@ const checkout = async(req,res,next)=>{
         committed=true;
         logger.info(`Checkout completed successfully (Order: ${order.id}, User: ${req.user.id})`);
         return res.status(201).json({
-    message: "Checkout successful",
-    order,
-    order_items
-});
+            message: "Checkout successful",
+            order,
+            order_items
+        });
     } catch (err) {
     if (client&&!committed){
     logger.error(`Checkout transaction rolled back for user ${req.user?.id}: ${err.message}`);

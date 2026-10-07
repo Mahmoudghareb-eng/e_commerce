@@ -1,8 +1,6 @@
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-secret";
 
-const jwt = require("jsonwebtoken");
-
 jest.mock("../config/db", () => ({
   connect: jest.fn(),
 }));
@@ -98,8 +96,6 @@ const clearCacheByPattern = require("../utility/redis.util");
 const API = "/api/v1/orders";
 
 const userToken = "user-token";
-
-const anotherUserToken = "another-user-token";
 
 const adminToken = "admin-token";
 

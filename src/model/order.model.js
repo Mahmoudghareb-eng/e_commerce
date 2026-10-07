@@ -27,7 +27,7 @@ const createOrder = async (
     return result.rows[0];
 
   } catch (err) {
-    throw new Error('Error creating order: ' + err.message);
+    throw new Error('Error creating order: ' + err.message, { cause: err });
   }
 };
 
@@ -47,7 +47,7 @@ const getOrders = async (limit = 10, offset = 0) => {
     return result.rows;
 
   } catch (err) {
-    throw new Error('Error fetching orders: ' + err.message);
+    throw new Error('Error fetching orders: ' + err.message, { cause: err });
   }
 };
 
@@ -66,7 +66,7 @@ const getOrderById = async (id,client=db) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error fetching order: ' + err.message);
+    throw new Error('Error fetching order: ' + err.message, { cause: err });
   }
 };
 
@@ -88,7 +88,7 @@ const getOrdersByUser = async (user_id) => {
     return result.rows;
 
   } catch (err) {
-    throw new Error('Error fetching user orders: ' + err.message);
+    throw new Error('Error fetching user orders: ' + err.message, { cause: err });
   }
 };
 
@@ -108,7 +108,7 @@ const updateOrderStatus = async (id, status,client=db) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error updating order status: ' + err.message);
+    throw new Error('Error updating order status: ' + err.message, { cause: err });
   }
 };
 
@@ -127,7 +127,7 @@ const deleteOrder = async (id) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error deleting order: ' + err.message);
+    throw new Error('Error deleting order: ' + err.message, { cause: err });
   }
 };
 

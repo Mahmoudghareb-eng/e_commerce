@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require("cors");
 const compression = require("compression");
 const helmet = require("helmet");
-const swaggerSpec = require("./config/swagger");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const userRoute = require('./routes/user.route');

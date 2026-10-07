@@ -199,6 +199,8 @@ describe("POST /api/v1/users/register", () => {
 
         expect(response.statusCode).toBe(400);
 
+        console.log("RESPONSE:", response.body);
+
         expect(response.body.msg).toBe(
             "Email already exists"
         );

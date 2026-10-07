@@ -38,7 +38,7 @@ const createOrderItem = async (
 
   } catch (err) {
     throw new Error(
-      'Error creating order item: ' + err.message
+      'Error creating order item: ' + err.message, { cause: err }
     );
   }
 };
@@ -76,7 +76,7 @@ const getItemsByOrderId = async (order_id,client=db) => {
 
   } catch (err) {
     throw new Error(
-      'Error fetching order items: ' + err.message
+      'Error fetching order items: ' + err.message, { cause: err }
     );
   }
 };
@@ -99,7 +99,7 @@ const getOrderItemById = async (id) => {
 
   } catch (err) {
     throw new Error(
-      'Error fetching order item: ' + err.message
+      'Error fetching order item: ' + err.message, { cause: err }
     );
   }
 };
@@ -132,7 +132,7 @@ const updateOrderItem = async (id, quantity) => {
 
   } catch (err) {
     throw new Error(
-      'Error updating order item: ' + err.message
+      'Error updating order item: ' + err.message, { cause: err }
     );
   }
 };
@@ -155,7 +155,7 @@ const deleteOrderItem = async (id) => {
 
   } catch (err) {
     throw new Error(
-      'Error deleting order item: ' + err.message
+      'Error deleting order item: ' + err.message, { cause: err }
     );
   }
 };

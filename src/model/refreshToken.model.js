@@ -17,7 +17,7 @@ const createRefreshToken = async (
 
     return result.rows[0];
   } catch (err) {
-    throw new Error("Error creating refresh token: " + err.message);
+    throw new Error("Error creating refresh token: " + err.message, { cause: err });
   }
 };
 
@@ -35,7 +35,7 @@ const getRefreshToken = async (token_hash) => {
 
     return result.rows[0] || null;
   } catch (err) {
-    throw new Error("Error fetching refresh token: " + err.message);
+    throw new Error("Error fetching refresh token: " + err.message, { cause: err });
   }
 };
 
@@ -52,7 +52,7 @@ const revokeRefreshToken = async (token_hash) => {
 
     return result.rows[0] || null;
   } catch (err) {
-    throw new Error("Error revoking refresh token: " + err.message);
+    throw new Error("Error revoking refresh token: " + err.message, { cause: err });
   }
 };
 
@@ -69,7 +69,7 @@ const deleteRefreshToken = async (token_hash) => {
 
     return result.rows[0] || null;
   } catch (err) {
-    throw new Error("Error deleting refresh token: " + err.message);
+    throw new Error("Error deleting refresh token: " + err.message, { cause: err });
   }
 };
 

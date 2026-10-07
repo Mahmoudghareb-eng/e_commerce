@@ -50,15 +50,6 @@ const userToken = jwt.sign(
   TEST_SECRET
 );
 
-const anotherUserToken = jwt.sign(
-  {
-    id: 8,
-    userId: 8,
-    role: "user",
-  },
-  TEST_SECRET
-);
-
 // CHANGED: Return the user represented by the token
 beforeEach(() => {
   jest.clearAllMocks();

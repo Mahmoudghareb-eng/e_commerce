@@ -12,7 +12,7 @@ const addCoupons = async (code, discount_percent, expires_at = null) => {
         return result.rows[0];
 
     } catch (err) {
-        throw new Error('Error creating coupon: ' + err.message);
+        throw new Error('Error creating coupon: ' + err.message, { cause: err });
     }
 };
 
@@ -26,7 +26,7 @@ const getCouponsByCode = async (code,client=db) => {
         return result.rows[0] || null;
 
     } catch (err) {
-        throw new Error('Error fetching coupon: ' + err.message);
+        throw new Error('Error fetching coupon: ' + err.message, { cause: err });
     }
 };
 
@@ -42,7 +42,7 @@ const deleteCoupons = async (code) => {
         return result.rows[0] || null;
 
     } catch (err) {
-        throw new Error('Error deleting coupon: ' + err.message);
+        throw new Error('Error deleting coupon: ' + err.message, { cause: err });
     }
 };
 

@@ -13,7 +13,7 @@ const addProduct = async (name, description, price, quantity, image_url) => {
     return result.rows[0];
 
   } catch (err) {
-    throw new Error('Error creating product: ' + err.message);
+    throw new Error('Error creating product: ' + err.message, { cause: err });
   }
 };
 
@@ -46,7 +46,7 @@ const getProducts = async(search,minprice,maxprice,sort,limit,offset)=>{
   const result = await db.query(query,values);
   return result.rows;
   }catch (err) {
-    throw new Error('Error fetching products: ' + err.message);
+    throw new Error('Error fetching products: ' + err.message, { cause: err });
   }
 }
 
@@ -61,7 +61,7 @@ const getProductById = async (id,client=db) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error fetching product: ' + err.message);
+    throw new Error('Error fetching product: ' + err.message, { cause: err });
   }
 };
 
@@ -77,7 +77,7 @@ const getProductsByIds = async (ids,client=db) => {
     return result.rows;
 
   } catch (err) {
-    throw new Error('Error fetching product: ' + err.message);
+    throw new Error('Error fetching product: ' + err.message, { cause: err });
   }
 };
 
@@ -98,7 +98,7 @@ const updateProduct = async (id, quantity, price) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error updating product: ' + err.message);
+    throw new Error('Error updating product: ' + err.message, { cause: err });
   }
 };
 
@@ -115,7 +115,7 @@ const updateQuantity = async(id,quantity,client=db)=>{
     );
     return result.rows[0];
   } catch (err) {
-    throw new Error('Error updating product: ' + err.message);
+    throw new Error('Error updating product: ' + err.message, { cause: err });
   }
 };
 
@@ -135,7 +135,7 @@ const deleteProduct = async (id) => {
     return result.rows[0] || null;
 
   } catch (err) {
-    throw new Error('Error deleting product: ' + err.message);
+    throw new Error('Error deleting product: ' + err.message, { cause: err });
   }
 };
 
