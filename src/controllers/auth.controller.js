@@ -5,12 +5,12 @@ const {
 const User = require("../model/user.model");
 const refresh_token = require("../model/refreshToken.model");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto")
 const hashRefreshToken = require("../utility/hash.utility");
 const sendCode = require("../utility/sandCode.utility")
 const { refreshCookieOptions, clearRefreshCookieOptions } = require("../config/cookie");
 const { AppError } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
-const { use } = require("../config/email");
 
 //rigster
 const register = async(req,res,next)=>{
@@ -46,7 +46,7 @@ const register = async(req,res,next)=>{
         res.cookie("refreshToken",refreshToken,refreshCookieOptions);
 
         return res.status(201).json({
-        message: "User created successfully",
+        msg: "User created successfully",
         accessToken,
         user: {
         id: user.id,
@@ -102,7 +102,7 @@ const login = async(req,res,next)=>{
 
     logger.info(`User logged in: ${user.email} (ID: ${user.id})`);
     return res.status(200).json({
-        message: "User logged in successfully",
+        msg: "User logged in successfully",
         accessToken,
         user: {
         id: user.id,
@@ -155,7 +155,7 @@ const refresh = async(req,res,next)=>{
     res.cookie("refreshToken",newRefreshToken,refreshCookieOptions);
 
     return res.status(200).json({
-        message: "User refresh successfully",
+        msg: "User refresh successfully",
         accessToken      
     })
     } catch(err){
@@ -163,8 +163,8 @@ const refresh = async(req,res,next)=>{
         err.name === "TokenExpiredError" ||
         err.name === "JsonWebTokenError"
     ) {
-        err.status = 401;
-        err.message = "Invalid or expired refresh token";
+        err.statusCode  = 401;
+        err.message  = "Invalid or expired refresh token";
     }
     next(err);
     }

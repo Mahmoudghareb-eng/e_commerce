@@ -6,7 +6,8 @@ const product = {
     description: "core i5 12th 8ram",
     created_at: "2026-01-01T10:00:00.000Z",
     updated_at: "2026-01-01T10:00:00.000Z",
-    deleted_at: null
+    deleted_at: null,
+    image_url: "https://example.com/image.jpg"
 };
 
 module.exports = {

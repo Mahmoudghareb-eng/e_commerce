@@ -2,7 +2,9 @@ const {
     getMyOrders, 
     getOrderById,
     updateOrderStatus,
-    cancelOrder, } = require("../controllers/order.controller");
+    cancelOrder,
+    deleteOrder
+} = require("../controllers/order.controller");
 
 const db = require("../config/db");
 const Order = require("../model/order.model");
@@ -19,7 +21,13 @@ jest.mock("../model/order.model");
 jest.mock("../model/orderItem.model");
 jest.mock("../model/product.model");
 
-jest.mock("../model/order.model");
+jest.mock("../utility/redis.util", () => jest.fn());
+
+jest.mock("../config/logger", () => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
+}));
 
 jest.mock("../config/redis", () => ({
     get: jest.fn(),
@@ -1706,29 +1714,6 @@ describe("Cancel Order Controller", () => {
     });
 
 });
-
-const { deleteOrder } = require("../controllers/order.controller");
-
-const Order = require("../model/order.model");
-const redis = require("../config/redis");
-const clearCacheByPattern = require("../utility/redis.util");
-const logger = require("../config/logger");
-
-jest.mock("../model/order.model");
-
-jest.mock("../config/redis", () => ({
-    get: jest.fn(),
-    setEx: jest.fn(),
-    del: jest.fn()
-}));
-
-jest.mock("../utility/redis.util");
-
-jest.mock("../config/logger", () => ({
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn()
-}));
 
 describe("Delete Order Controller", () => {
 

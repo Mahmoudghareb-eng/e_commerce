@@ -398,7 +398,7 @@ describe("Get Users Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith(
-                users
+                {users}
             );
 
 
@@ -465,7 +465,7 @@ describe("Get Users Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith(
-                users
+                {users}
             );
     });
 
@@ -514,7 +514,7 @@ describe("Get Users Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith(
-                users
+                {users}
             );
     });
 

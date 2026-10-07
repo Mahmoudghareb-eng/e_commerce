@@ -54,7 +54,8 @@ describe("Create Product Controller", () => {
                 name: "labtop",
                 description: "core i5 12th 8ram",
                 price: 36000,
-                quantity: 5
+                quantity: 5,
+                image_url: "https://example.com/image.jpg"
             }
         };
 
@@ -87,7 +88,8 @@ describe("Create Product Controller", () => {
                 "labtop",
                 "core i5 12th 8ram",
                 36000,
-                5
+                5,
+                "https://example.com/image.jpg"
             );
 
         expect(logger.info)
@@ -135,7 +137,8 @@ describe("Create Product Controller", () => {
                 "labtop",
                 "core i5 12th 8ram",
                 36000,
-                5
+                5,
+                "https://example.com/image.jpg"
             );
 
         expect(next)
@@ -200,7 +203,8 @@ describe("Create Product Controller", () => {
                 "labtop",
                 "core i5 12th 8ram",
                 36000,
-                5
+                5,
+                "https://example.com/image.jpg"
             );
 
         expect(clearCacheByPattern)

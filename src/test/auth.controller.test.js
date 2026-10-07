@@ -2,6 +2,8 @@ const {
     register,
     login,
     refresh,
+    forgotPassword,
+    resetPassword,
     logout
 } = require("../controllers/auth.controller");
 
@@ -26,6 +28,7 @@ const {
 } = require("../config/jwt");
 
 const hashRefreshToken = require("../utility/hash.utility");
+const sendCode = require("../utility/sandCode.utility");
 
 const logger = require("../config/logger");
 
@@ -47,6 +50,7 @@ jest.mock("../config/jwt", () => ({
 }));
 
 jest.mock("../utility/hash.utility");
+jest.mock("../utility/sandCode.utility")
 
 jest.mock("../config/logger", () => ({
     info: jest.fn(),
@@ -189,7 +193,7 @@ describe("Register Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith({
-                message: "User created successfully",
+                msg: "User created successfully",
                 accessToken: "access-token",
                 user: {
                     id: user.id,
@@ -422,7 +426,7 @@ describe("Login Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith({
-                message: "User logged in successfully",
+                msg: "User logged in successfully",
                 accessToken: "access-token",
                 user: {
                     id: user.id,
@@ -898,7 +902,7 @@ describe("Refresh Controller", () => {
 
         expect(res.json)
             .toHaveBeenCalledWith({
-                message: "User refresh successfully",
+                msg: "User refresh successfully",
                 accessToken: "new-access-token"
             });
 
@@ -1107,7 +1111,7 @@ test("should return 401 if refresh token is invalid", async () => {
     expect(receivedError.message)
         .toBe("Invalid or expired refresh token");
 
-    expect(receivedError.status)
+    expect(receivedError.statusCode)
         .toBe(401);
 });
 
@@ -1143,7 +1147,7 @@ test("should return 401 if refresh token is invalid", async () => {
     expect(receivedError.message)
         .toBe("Invalid or expired refresh token");
 
-    expect(receivedError.status)
+    expect(receivedError.statusCode)
         .toBe(401);
 });
 
@@ -1335,6 +1339,331 @@ test("should return 401 if refresh token is invalid", async () => {
             .toHaveBeenCalledWith(error);
     });
 
+});
+// =====================================================
+// frogetPassword CONTROLLER
+// =====================================================
+describe("forgotPassword", () => {
+
+  let req;
+  let res;
+  let next;
+
+  beforeEach(() => {
+    req = {
+      body: {
+        email: "test@gmail.com"
+      }
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    next = jest.fn();
+
+    jest.clearAllMocks();
+  });
+
+  test("should send verification code successfully", async () => {
+    const user = {
+      id: 1,
+      email: "test@gmail.com"
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+    User.setResetCode.mockResolvedValue();
+    sendCode.mockResolvedValue();
+
+    await forgotPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith("test@gmail.com");
+
+    expect(User.setResetCode).toHaveBeenCalledWith(
+      1,
+      expect.any(String),
+      expect.any(Date)
+    );
+
+    expect(sendCode).toHaveBeenCalledWith(
+      "test@gmail.com",
+      expect.any(String)
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    expect(res.json).toHaveBeenCalledWith({
+      msg: "Verification code sent successfully",
+      code: expect.any(String)
+    });
+
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("should fail if user does not exist", async () => {
+    User.getUserByEmail.mockResolvedValue(null);
+
+    await forgotPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith("test@gmail.com");
+
+    expect(next).toHaveBeenCalled();
+
+    expect(res.status).not.toHaveBeenCalled();
+
+    expect(sendCode).not.toHaveBeenCalled();
+    expect(User.setResetCode).not.toHaveBeenCalled();
+  });
+
+  test("should convert email to lowercase", async () => {
+    req.body.email = "TEST@GMAIL.COM";
+
+    User.getUserByEmail.mockResolvedValue({
+      id: 1,
+      email: "test@gmail.com"
+    });
+
+    User.setResetCode.mockResolvedValue();
+    sendCode.mockResolvedValue();
+
+    await forgotPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith(
+      "test@gmail.com"
+    );
+
+    expect(sendCode).toHaveBeenCalledWith(
+      "test@gmail.com",
+      expect.any(String)
+    );
+  });
+
+  test("should call next if sending email fails", async () => {
+    User.getUserByEmail.mockResolvedValue({
+      id: 1,
+      email: "test@gmail.com"
+    });
+
+    User.setResetCode.mockResolvedValue();
+
+    const error = new Error("Email sending failed");
+
+    sendCode.mockRejectedValue(error);
+
+    await forgotPassword(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
+
+    expect(res.status).not.toHaveBeenCalled();
+  });
+});
+
+// =====================================================
+// RESET PASSWORD CONTROLLER
+// =====================================================
+describe("resetPassword", () => {
+  let req;
+  let res;
+  let next;
+
+  beforeEach(() => {
+    req = {
+      body: {
+        email: "test@gmail.com",
+        code: "123456",
+        password: "newpassword123"
+      }
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    next = jest.fn();
+
+    jest.clearAllMocks();
+  });
+
+  it("should reset password successfully", async () => {
+    const user = {
+      id: 1,
+      email: "test@gmail.com",
+      reset_code: "123456",
+      reset_attempts: 0,
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+    bcrypt.hash.mockResolvedValue("hashedPassword");
+    User.updatePassword.mockResolvedValue();
+
+    await resetPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith(
+      "test@gmail.com"
+    );
+
+    expect(bcrypt.hash).toHaveBeenCalledWith(
+      "newpassword123",
+      10
+    );
+
+    expect(User.updatePassword).toHaveBeenCalledWith(
+      1,
+      "hashedPassword"
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    expect(res.json).toHaveBeenCalledWith({
+      msg: "Reset password successfully"
+    });
+
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("should fail if user does not exist", async () => {
+    User.getUserByEmail.mockResolvedValue(null);
+
+    await resetPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith(
+      "test@gmail.com"
+    );
+
+    expect(next).toHaveBeenCalled();
+
+    expect(User.updatePassword).not.toHaveBeenCalled();
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+  });
+
+  it("should fail if maximum attempts reached", async () => {
+    const user = {
+      id: 1,
+      reset_attempts: 5,
+      reset_code: "123456",
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+
+    await resetPassword(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+
+    expect(User.incrementResetAttempts).not.toHaveBeenCalled();
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(User.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it("should fail if reset code is expired", async () => {
+    const user = {
+      id: 1,
+      reset_attempts: 0,
+      reset_code: "123456",
+      reset_code_expires_at: new Date(Date.now() - 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+
+    await resetPassword(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(User.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it("should fail if reset code is invalid", async () => {
+    const user = {
+      id: 1,
+      reset_attempts: 0,
+      reset_code: "654321",
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+
+    User.incrementResetAttempts.mockResolvedValue({
+      reset_attempts: 1
+    });
+
+    await resetPassword(req, res, next);
+
+    expect(User.incrementResetAttempts).toHaveBeenCalledWith(1);
+
+    expect(next).toHaveBeenCalled();
+
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(User.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it("should fail with too many attempts after invalid code", async () => {
+    const user = {
+      id: 1,
+      reset_attempts: 4,
+      reset_code: "654321",
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+
+    User.incrementResetAttempts.mockResolvedValue({
+      reset_attempts: 5
+    });
+
+    await resetPassword(req, res, next);
+
+    expect(User.incrementResetAttempts).toHaveBeenCalledWith(1);
+
+    expect(next).toHaveBeenCalled();
+
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(User.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it("should convert email to lowercase", async () => {
+    req.body.email = "TEST@GMAIL.COM";
+
+    const user = {
+      id: 1,
+      reset_attempts: 0,
+      reset_code: "123456",
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    User.getUserByEmail.mockResolvedValue(user);
+    bcrypt.hash.mockResolvedValue("hashedPassword");
+    User.updatePassword.mockResolvedValue();
+
+    await resetPassword(req, res, next);
+
+    expect(User.getUserByEmail).toHaveBeenCalledWith(
+      "test@gmail.com"
+    );
+  });
+
+  it("should call next if password hashing fails", async () => {
+    const user = {
+      id: 1,
+      reset_attempts: 0,
+      reset_code: "123456",
+      reset_code_expires_at: new Date(Date.now() + 10 * 60 * 1000)
+    };
+
+    const error = new Error("Hashing failed");
+
+    User.getUserByEmail.mockResolvedValue(user);
+    bcrypt.hash.mockRejectedValue(error);
+
+    await resetPassword(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
+
+    expect(User.updatePassword).not.toHaveBeenCalled();
+  });
 });
 
 // =====================================================

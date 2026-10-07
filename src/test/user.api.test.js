@@ -246,7 +246,7 @@ describe("GET /api/v1/users/me", () => {
       .get("/api/v1/users/me")
       .set("Authorization", "Bearer valid-user-token");
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(404);
 
     expect(User.getUserById).toHaveBeenCalledWith(7);
 
@@ -390,7 +390,7 @@ describe("PUT /api/v1/users/me", () => {
         email: "new@example.com",
       });
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(404);
 
     expect(User.updateUser).not.toHaveBeenCalled();
 
@@ -482,7 +482,7 @@ describe("DELETE /api/v1/users/me", () => {
       .delete("/api/v1/users/me")
       .set("Authorization", "Bearer valid-user-token");
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(404);
 
     expect(redis.del).not.toHaveBeenCalled();
 

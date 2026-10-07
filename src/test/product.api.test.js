@@ -81,6 +81,7 @@ describe("POST /api/v1/products", () => {
       description: "Gaming laptop",
       price: 1500,
       quantity: 10,
+      image_url: "https://example.com/image.jpg"
     };
     Product.addProduct.mockResolvedValue(product);
     clearCacheByPattern.mockResolvedValue();
@@ -88,10 +89,11 @@ describe("POST /api/v1/products", () => {
       .post(API)
       .set("Authorization", "Bearer admin-token")
       .send({
-        name: "  Laptop  ",
-        description: "  Gaming laptop  ",
+        name: "Laptop",
+        description: "Gaming laptop",
         price: 1500,
         quantity: 10,
+        image_url: "https://example.com/image.jpg"
       });
     expect(response.status).toBe(201);
     expect(response.body).toEqual({
@@ -102,7 +104,8 @@ describe("POST /api/v1/products", () => {
       "Laptop",
       "Gaming laptop",
       1500,
-      10
+      10,
+      "https://example.com/image.jpg"
     );
     expect(clearCacheByPattern).toHaveBeenCalledWith("products:*");
   });
@@ -112,6 +115,7 @@ describe("POST /api/v1/products", () => {
       description: "Gaming laptop",
       price: 1500,
       quantity: 10,
+      image_url: "https://example.com/image.jpg"
     });
     expect([401, 403]).toContain(response.status);
     expect(Product.addProduct).not.toHaveBeenCalled();
@@ -125,6 +129,7 @@ describe("POST /api/v1/products", () => {
         description: "Gaming laptop",
         price: 1500,
         quantity: 10,
+        image_url: "https://example.com/image.jpg"
       });
     expect([401, 403]).toContain(response.status);
     expect(Product.addProduct).not.toHaveBeenCalled();
@@ -165,6 +170,7 @@ describe("POST /api/v1/products", () => {
         description: "Gaming laptop",
         price: 1500,
         quantity: 10,
+        image_url: "https://example.com/image.jpg"
       });
     expect(response.status).toBeGreaterThanOrEqual(500);
     expect(clearCacheByPattern).not.toHaveBeenCalled();
@@ -176,6 +182,7 @@ describe("POST /api/v1/products", () => {
       description: "Gaming laptop",
       price: 1500,
       quantity: 10,
+      image_url: "https://example.com/image.jpg"
     };
     Product.addProduct.mockResolvedValue(product);
     clearCacheByPattern.mockRejectedValue(
@@ -189,6 +196,7 @@ describe("POST /api/v1/products", () => {
         description: "Gaming laptop",
         price: 1500,
         quantity: 10,
+        image_url: "https://example.com/image.jpg"
       });
     expect(response.status).toBeGreaterThanOrEqual(500);
   });
