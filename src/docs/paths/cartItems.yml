@@ -1,0 +1,89 @@
+cartItems:
+  post:
+    operationId: addProductToCart
+    summary: Add a product to the current user's cart
+    tags: [Cart Items]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/cart.yml#/AddItemToCart"
+    responses:
+      "201":
+        description: Item added successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "404":
+        description: Product or cart not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  get:
+    operationId: getProductsInCart
+    summary: Get all items in the current user's cart
+    tags: [Cart Items]
+    security:
+      - bearerAuth: []
+    responses:
+      "200":
+        description: Cart items fetched successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "404":
+        description: Cart not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+cartItemById:
+  put:
+    operationId: updateItemQuantity
+    summary: Update cart item quantity
+    tags: [Cart Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ItemId"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/order.yml#/UpdateItemQuantity"
+    responses:
+      "200":
+        description: Cart item updated successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/NotAllowed"
+      "404":
+        description: Cart item or product not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  delete:
+    operationId: removeProductFromCart
+    summary: Remove an item from the current user's cart
+    tags: [Cart Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ItemId"
+    responses:
+      "200":
+        description: Cart item removed successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/NotAllowed"
+      "404":
+        description: Cart item not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"

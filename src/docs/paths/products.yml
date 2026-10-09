@@ -1,0 +1,106 @@
+products:
+  post:
+    operationId: createProduct
+    summary: Create a new product
+    tags: [Products]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: "../schemas/product.yml#/AddProduct"
+    responses:
+      "201":
+        description: Product created successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  get:
+    operationId: getProducts
+    summary: Get all products
+    tags: [Products]
+    parameters:
+      - $ref: "../parameters/common.yml#/Search"
+      - $ref: "../parameters/common.yml#/Page"
+      - $ref: "../parameters/common.yml#/Limit"
+      - $ref: "../parameters/common.yml#/MinPrice"
+      - $ref: "../parameters/common.yml#/MaxPrice"
+      - $ref: "../parameters/common.yml#/Sort"
+    responses:
+      "200":
+        description: Products fetched successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+productById:
+  get:
+    operationId: getProductById
+    summary: Get product by ID
+    tags: [Products]
+    parameters:
+      - $ref: "../parameters/common.yml#/ProductId"
+    responses:
+      "200":
+        description: Product fetched successfully
+      "404":
+        description: Product not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  put:
+    operationId: updateProduct
+    summary: Update product
+    tags: [Products]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ProductId"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/product.yml#/UpdateProduct"
+    responses:
+      "200":
+        description: Product updated successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "404":
+        description: Product not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  delete:
+    operationId: deleteProduct
+    summary: Delete product
+    tags: [Products]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ProductId"
+    responses:
+      "200":
+        description: Product deleted successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "404":
+        description: Product not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"

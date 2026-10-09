@@ -3,7 +3,7 @@ const path = require("path");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yaml");
 
-const swaggerPath = path.join(__dirname, "../docs/swagger.yml")
+const swaggerPath = path.join(__dirname, "../docs/swagger.bundle.yml")
 
 console.log(swaggerPath);
 

@@ -1,0 +1,21 @@
+CreateCoupon:
+  type: object
+  required:
+    - code
+    - discount_percent
+  properties:
+    code:
+      type: string
+      description: Unique coupon code
+      example: ABC12
+    discount_percent:
+      type: integer
+      minimum: 1
+      maximum: 100
+      description: Discount percentage
+      example: 10
+    expires_at:
+      type: string
+      format: date-time
+      description: Coupon expiration date
+      example: "2026-12-31T23:59:59Z"

@@ -1,0 +1,83 @@
+ProductId:
+  in: path
+  name: id
+  required: true
+  description: Product ID
+  schema:
+    type: integer
+
+OrderId:
+  in: path
+  name: id
+  required: true
+  description: Order ID
+  schema:
+    type: integer
+
+OrderItemOrderId:
+  in: path
+  name: order_id
+  required: true
+  description: Order ID
+  schema:
+    type: integer
+
+ItemId:
+  in: path
+  name: id
+  required: true
+  description: Item ID
+  schema:
+    type: integer
+
+CouponCode:
+  in: path
+  name: code
+  required: true
+  description: Coupon code
+  schema:
+    type: string
+
+Search:
+  in: query
+  name: search
+  description: Search by product name
+  schema:
+    type: string
+
+Page:
+  in: query
+  name: page
+  schema:
+    type: integer
+    example: 1
+
+Limit:
+  in: query
+  name: limit
+  schema:
+    type: integer
+    example: 10
+
+MinPrice:
+  in: query
+  name: minPrice
+  schema:
+    type: number
+    example: 100
+
+MaxPrice:
+  in: query
+  name: maxPrice
+  schema:
+    type: number
+    example: 1000
+
+Sort:
+  in: query
+  name: sort
+  schema:
+    type: string
+    enum:
+      - asc
+      - desc

@@ -1,0 +1,87 @@
+orderItemsByOrderId:
+  get:
+    operationId: getOrderItemsByOrderId
+    summary: Get all items for a specific order
+    tags: [Order Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/OrderItemOrderId"
+    responses:
+      "200":
+        description: Order items fetched successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/Forbidden"
+      "404":
+        description: Order not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+orderItemById:
+  get:
+    operationId: getOrderItemsById
+    summary: Get order item by ID
+    tags: [Order Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ItemId"
+    responses:
+      "200":
+        description: Order item fetched successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/Forbidden"
+      "404":
+        description: Order item not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  put:
+    operationId: updateOrderItemsById
+    summary: Update order item quantity
+    tags: [Order Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ItemId"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/order.yml#/UpdateItemQuantity"
+    responses:
+      "200":
+        description: Order item updated successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/Forbidden"
+      "404":
+        description: Order item not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  delete:
+    operationId: deleteOrderItemsById
+    summary: Delete order item
+    tags: [Order Items]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/ItemId"
+    responses:
+      "200":
+        description: Order item deleted successfully
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/Forbidden"
+      "404":
+        description: Order item not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"

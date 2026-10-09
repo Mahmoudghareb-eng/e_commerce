@@ -1,0 +1,20 @@
+Unauthorized:
+  description: Unauthorized
+
+Forbidden:
+  description: Forbidden
+
+ValidationError:
+  description: Validation error
+
+ServerError:
+  description: Server error
+
+TooManyRequest:
+  description: Too many requests
+
+AdminOnly:
+  description: Admin only
+
+NotAllowed:
+  description: Not allowed

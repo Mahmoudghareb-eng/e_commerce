@@ -1,0 +1,69 @@
+Register:
+  type: object
+  required:
+    - name
+    - email
+    - password
+  properties:
+    name:
+      type: string
+      example: Mahmoud
+    email:
+      type: string
+      format: email
+      example: mahmoud@example.com
+    password:
+      type: string
+      example: Password123
+Login:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: mahmoud@example.com
+    password:
+      type: string
+      example: Password123
+
+ForgetPassword:
+  type: object
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      format: email
+      example: mahmoud@example.com
+
+ResetPassword:
+  type: object
+  required:
+    - email
+    - code
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: mahmoud@example.com
+    code:
+      type: string 
+      example: "123456"
+    password:
+      type: string
+      example: Password123
+
+UpdateMe:
+  type: object
+  properties:
+    name:
+      type: string
+      example: Mahmoud Gharib
+    email:
+      type: string
+      format: email
+      example: mahmoud@example.com

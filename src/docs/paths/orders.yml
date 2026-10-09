@@ -1,0 +1,104 @@
+myOrders:
+  get:
+    operationId: getMyOrders
+    summary: Get my orders
+    tags: [Orders]
+    security:
+      - bearerAuth: []
+    responses:
+      "200":
+        description: Orders fetched successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+orderById:
+  get:
+    operationId: getOrderById
+    summary: Get order by ID
+    tags: [Orders]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/OrderId"
+    responses:
+      "200":
+        description: Order fetched successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "403":
+        $ref: "../responses/common.yml#/NotAllowed"
+      "404":
+        description: Order not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  put:
+    operationId: updateOrderById
+    summary: Update order by ID
+    tags: [Orders]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/OrderId"
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/order.yml#/UpdateOrder"
+    responses:
+      "200":
+        description: Order updated successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "404":
+        description: Order not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  delete:
+    operationId: deleteOrderById
+    summary: Delete order by ID
+    tags: [Orders]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/OrderId"
+    responses:
+      "200":
+        description: Order deleted successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "403":
+        $ref: "../responses/common.yml#/NotAllowed"
+      "404":
+        description: Order not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+cancelOrder:
+  patch:
+    operationId: cancelOrderById
+    summary: Cancel order by ID
+    tags: [Orders]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/OrderId"
+    responses:
+      "200":
+        description: Order cancelled successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "403":
+        $ref: "../responses/common.yml#/NotAllowed"
+      "404":
+        description: Order not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"

@@ -1,0 +1,15 @@
+AddItemToCart:
+  type: object
+  description: Request body for adding a product to the shopping cart.
+  required:
+    - product_id
+    - quantity
+  properties:
+    product_id:
+      type: integer
+      minimum: 1
+      example: 1
+    quantity:
+      type: integer
+      minimum: 1
+      example: 10

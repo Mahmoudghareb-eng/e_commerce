@@ -1,0 +1,70 @@
+coupons:
+  post:
+    operationId: createCoupon
+    summary: Create a new coupon
+    tags: [Coupons]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/coupon.yml#/CreateCoupon"
+    responses:
+      "201":
+        description: Coupon created successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+couponByCode:
+  get:
+    operationId: getCouponByCode
+    summary: Get coupon by code
+    description: Retrieve coupon details using its unique code.
+    tags: [Coupons]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/CouponCode"
+    responses:
+      "200":
+        description: Coupon fetched successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "404":
+        description: Coupon not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
+
+  delete:
+    operationId: deleteCouponByCode
+    summary: Delete coupon by code
+    tags: [Coupons]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "../parameters/common.yml#/CouponCode"
+    responses:
+      "200":
+        description: Coupon deleted successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "403":
+        $ref: "../responses/common.yml#/AdminOnly"
+      "404":
+        description: Coupon not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"

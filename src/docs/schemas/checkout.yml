@@ -1,0 +1,7 @@
+Checkout:
+  type: object
+  properties:
+    code:
+      type: string
+      description: Unique coupon code
+      example: ABC12

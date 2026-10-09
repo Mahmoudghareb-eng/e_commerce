@@ -1,0 +1,41 @@
+AddProduct:
+  type: object
+  required:
+    - name
+    - description
+    - price
+    - quantity
+  properties:
+    name:
+      type: string
+      example: iPhone 15
+    description:
+      type: string
+      example: Apple smartphone
+    price:
+      type: number
+      format: float
+      example: 999.99
+    quantity:
+      type: integer
+      example: 10
+    image_url:
+      type: string
+      format: binary
+
+UpdateProduct:
+  type: object
+  properties:
+    name:
+      type: string
+      example: iPhone 15 Pro
+    description:
+      type: string
+      example: Updated description
+    price:
+      type: number
+      format: float
+      example: 1099.99
+    quantity:
+      type: integer
+      example: 20

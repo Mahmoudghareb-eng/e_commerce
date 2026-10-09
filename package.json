@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "docs:build": "redocly bundle src/docs/swagger.yml -o src/docs/swagger.bundle.yml",
+    "docs:check": "redocly lint src/docs/swagger.yml"
   },
   "keywords": [],
   "author": "",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@redocly/cli": "^2.62.0",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "jest": "^30.4.2",

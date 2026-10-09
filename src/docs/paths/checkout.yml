@@ -1,0 +1,25 @@
+checkout:
+  post:
+    operationId: makeOrder
+    summary: Create a new order from the current user's cart
+    description: Creates an order from the authenticated user's cart and optionally applies a coupon.
+    tags: [Checkout]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/checkout.yml#/Checkout"
+    responses:
+      "201":
+        description: Order created successfully
+      "400":
+        $ref: "../responses/common.yml#/ValidationError"
+      "401":
+        $ref: "../responses/common.yml#/Unauthorized"
+      "404":
+        description: Cart or product not found
+      "500":
+        $ref: "../responses/common.yml#/ServerError"
